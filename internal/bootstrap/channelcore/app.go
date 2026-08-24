@@ -74,7 +74,11 @@ func buildApp(ctx context.Context, runtime *ChannelRuntime, apiServer appServer,
 	application, err := app.New(
 		app.WithHealth(runtime.Health),
 		app.WithLifecycles(runtime.Telemetry),
-		app.WithComponents(runtime.Resources.Components()...),
+		app.WithComponents(append(runtime.Resources.Components(), app.ComponentFunc{
+			ComponentName: "channels",
+			StartFunc:     runtime.Channels.Start,
+			StopFunc:      runtime.Channels.Stop,
+		})...),
 		di.AppOption(runtime.Graph),
 		app.WithServers(servers...),
 		app.WithStopTimeout(runtime.Config.ShutdownTimeout),

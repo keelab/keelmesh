@@ -8,6 +8,8 @@ import (
 	"github.com/keelab/keelith/observability/logging"
 	"github.com/keelab/keelith/observability/logging/audit"
 	"github.com/keelab/keelith/service"
+	channelv1 "github.com/keelab/keelmesh/gen/channel/v1"
+	channelruntime "github.com/keelab/keelmesh/internal/channelcore"
 	"github.com/keelab/keelmesh/internal/config"
 	"github.com/keelab/keelmesh/internal/infrastructure/dependencies"
 )
@@ -21,8 +23,9 @@ func newServiceProfile(
 	resources *dependencies.Resources,
 	loggingDependencies logging.Dependencies,
 	auditLogger *audit.Logger,
+	channels *channelruntime.Runtime,
 ) (*di.Graph, *service.Profile, error) {
-	graph, _, err := newServiceHandlers(ctx, loaded.Runtime, resources, loggingDependencies, auditLogger)
+	graph, handlers, err := newServiceHandlers(ctx, loaded.Runtime, resources, channels, loggingDependencies, auditLogger)
 	if err != nil {
 		return nil, nil, fmt.Errorf("build service dependency graph: %w", err)
 	}
@@ -31,44 +34,10 @@ func newServiceProfile(
 		_ = graph.Close(context.WithoutCancel(ctx))
 		return nil, nil, fmt.Errorf("build protocol policies: %w", err)
 	}
-
-	profile, err := service.NewProfile(
-		"public-api",
-		service.NewGroup("authenticated").
-			RequireHTTP(service.CapabilityRequestID).
-			RequireGRPC(service.CapabilityRequestID).
-			UseHTTPPolicies(service.NewPolicy(
-				policies.requestID,
-				service.CapabilityRequestID,
-			)).
-			UseGRPCPolicies(service.NewPolicy(
-				policies.requestID,
-				service.CapabilityRequestID,
-			)).
-			Bind(
-			//taskv1.BindTaskService(
-			//	handlers.Task,
-			//	service.WithHTTPBundle(policies.httpIdempotency),
-			//	service.WithGRPCBundle(policies.grpcDeadline),
-			//),
-			//orderv1.BindOrderService(handlers.Order),
-			),
-		service.NewGroup("public").
-			RequireHTTP(service.CapabilityRequestID).
-			RequireGRPC(service.CapabilityRequestID).
-			UseHTTPPolicies(service.NewPolicy(
-				policies.requestID,
-				service.CapabilityRequestID,
-			)).
-			UseGRPCPolicies(service.NewPolicy(
-				policies.requestID,
-				service.CapabilityRequestID,
-			)).
-			Bind(
-			//inventoryv1.BindInventoryService(handlers.Inventory),
-			//customerv1.BindCustomerService(handlers.Customer),
-			),
-	)
+	profile, err := service.NewProfile("public-api", service.NewGroup("channel").
+		RequireGRPC(service.CapabilityRequestID).
+		UseGRPCPolicies(service.NewPolicy(policies.requestID, service.CapabilityRequestID)).
+		Bind(channelv1.BindChannelService(handlers.Channel)))
 	if err != nil {
 		_ = graph.Close(context.WithoutCancel(ctx))
 		return nil, nil, err

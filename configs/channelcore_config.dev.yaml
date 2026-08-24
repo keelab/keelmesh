@@ -17,6 +17,11 @@ runtime:
   ops_health_only: true
   dependencies_enabled: false
   secret_root: .secrets
+  channels:
+    - id: feishu
+      kind: feishu
+      enabled: false
+      media_root: .data/media
 components:
   sql:
     primary:

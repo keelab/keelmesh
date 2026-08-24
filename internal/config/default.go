@@ -97,6 +97,53 @@ func ValidateChannel(config ChannelConfig) error {
 	if config.ShutdownTimeout <= 0 {
 		return fmt.Errorf("runtime.shutdownTimeout must be greater than zero")
 	}
+	for index, channel := range config.Channels {
+		if strings.TrimSpace(channel.ID) == "" || strings.TrimSpace(channel.ID) != channel.ID {
+			return fmt.Errorf("runtime.channels[%d].id is invalid", index)
+		}
+		if strings.TrimSpace(channel.Kind) == "" || strings.TrimSpace(channel.Kind) != channel.Kind {
+			return fmt.Errorf("runtime.channels[%d].kind is invalid", index)
+		}
+		if channel.Enabled && channel.Kind == "feishu" && (strings.TrimSpace(channel.AppID) == "" || strings.TrimSpace(channel.AppSecret) == "") {
+			return fmt.Errorf("runtime.channels[%d] feishu app_id and app_secret are required", index)
+		}
+		if channel.Enabled {
+			switch channel.Kind {
+			case "feishu", "telegram", "qq", "dingtalk", "wecom", "wecom_app", "wecom_aibot", "webhook", "devops_publish":
+			default:
+				return fmt.Errorf("runtime.channels[%d] unsupported kind %q", index, channel.Kind)
+			}
+			switch channel.Kind {
+			case "telegram":
+				if strings.TrimSpace(channel.Telegram.Token) == "" {
+					return fmt.Errorf("runtime.channels[%d] telegram token is required", index)
+				}
+			case "qq":
+				if strings.TrimSpace(channel.QQ.AppID) == "" || strings.TrimSpace(channel.QQ.AppSecret) == "" {
+					return fmt.Errorf("runtime.channels[%d] qq app_id and app_secret are required", index)
+				}
+			case "dingtalk":
+				if strings.TrimSpace(channel.DingTalk.ClientID) == "" || strings.TrimSpace(channel.DingTalk.ClientSecret) == "" {
+					return fmt.Errorf("runtime.channels[%d] dingtalk credentials are required", index)
+				}
+			case "wecom":
+				if strings.TrimSpace(channel.WeCom.WebhookURL) == "" {
+					return fmt.Errorf("runtime.channels[%d] wecom webhook_url is required", index)
+				}
+			case "wecom_app":
+				if strings.TrimSpace(channel.WeComApp.CorpID) == "" || strings.TrimSpace(channel.WeComApp.CorpSecret) == "" || channel.WeComApp.AgentID == 0 {
+					return fmt.Errorf("runtime.channels[%d] wecom_app credentials are required", index)
+				}
+			case "devops_publish":
+				if strings.TrimSpace(channel.DevOpsPublish.ServerURL) == "" || strings.TrimSpace(channel.DevOpsPublish.AccountID) == "" || strings.TrimSpace(channel.DevOpsPublish.Credential) == "" {
+					return fmt.Errorf("runtime.channels[%d] devops_publish credentials are required", index)
+				}
+			}
+		}
+		if channel.RatePerSecond < 0 || channel.Burst < 0 || channel.QueueSize < 0 || channel.MaxRetries < 0 {
+			return fmt.Errorf("runtime.channels[%d] queue and retry values must not be negative", index)
+		}
+	}
 	if _, err := logging.ParseLevel(config.Logging.Level); err != nil {
 		return fmt.Errorf("runtime.logging.level: %w", err)
 	}

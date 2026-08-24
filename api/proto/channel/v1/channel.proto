@@ -1,0 +1,248 @@
+syntax = "proto3";
+
+package channel.v1;
+
+option go_package = "github.com/keelab/keelmesh/gen/channel/v1;channelv1";
+
+service ChannelService {
+  rpc ListChannels(ListChannelsRequest) returns (ListChannelsResponse);
+  rpc GetChannel(GetChannelRequest) returns (GetChannelResponse);
+  rpc ProbeChannel(ProbeChannelRequest) returns (ProbeChannelResponse);
+  rpc SendMessage(SendMessageRequest) returns (SendMessageResponse);
+  rpc SendMedia(SendMediaRequest) returns (SendMediaResponse);
+  rpc GetDeliveryStatus(GetDeliveryStatusRequest) returns (GetDeliveryStatusResponse);
+  rpc EditMessage(EditMessageRequest) returns (EditMessageResponse);
+  rpc SendPlaceholder(SendPlaceholderRequest) returns (SendPlaceholderResponse);
+  rpc StartTyping(StartTypingRequest) returns (StartTypingResponse);
+  rpc StopTyping(StopTypingRequest) returns (StopTypingResponse);
+  rpc ReactToMessage(ReactToMessageRequest) returns (ReactToMessageResponse);
+  rpc CompleteReaction(ReactionActionRequest) returns (ReactionActionResponse);
+  rpc ExpireReaction(ReactionActionRequest) returns (ReactionActionResponse);
+  rpc StartStreamingMessage(StartStreamingMessageRequest) returns (StartStreamingMessageResponse);
+  rpc UpdateStreamingMessage(UpdateStreamingMessageRequest) returns (UpdateStreamingMessageResponse);
+  rpc FinishStreamingMessage(FinishStreamingMessageRequest) returns (FinishStreamingMessageResponse);
+  rpc UploadMedia(UploadMediaRequest) returns (UploadMediaResponse);
+  rpc DownloadMedia(DownloadMediaRequest) returns (DownloadMediaResponse);
+  rpc ReleaseMedia(ReleaseMediaRequest) returns (ReleaseMediaResponse);
+  rpc SubscribeInbound(SubscribeInboundRequest) returns (stream SubscribeInboundResponse);
+}
+
+message ListChannelsRequest {}
+
+message ListChannelsResponse {
+  repeated ChannelInfo channels = 1;
+}
+
+message GetChannelRequest {
+  string channel_id = 1;
+}
+
+message GetChannelResponse {
+  ChannelInfo channel = 1;
+}
+
+message ProbeChannelRequest {
+  string channel_id = 1;
+}
+
+message ProbeChannelResponse {
+  ChannelInfo channel = 1;
+  string status = 2;
+  int64 latency_ms = 3;
+}
+
+message ChannelInfo {
+  string id = 1;
+  string kind = 2;
+  bool enabled = 3;
+  bool running = 4;
+  repeated string capabilities = 5;
+}
+
+message SendMessageRequest {
+  string channel_id = 1;
+  string target_id = 2;
+  string reply_to_message_id = 3;
+  string content = 4;
+  map<string, string> metadata = 5;
+  string idempotency_key = 6;
+}
+
+message SendMessageResponse {
+  string channel_id = 1;
+  string message_id = 2;
+  int64 accepted_at_ms = 3;
+  string state = 4;
+}
+
+message SendMediaRequest {
+  string channel_id = 1;
+  string target_id = 2;
+  repeated MediaPart parts = 3;
+  map<string, string> metadata = 4;
+  string idempotency_key = 5;
+}
+
+message SendMediaResponse {
+  string channel_id = 1;
+  string message_id = 2;
+  int64 accepted_at_ms = 3;
+  string state = 4;
+}
+
+message GetDeliveryStatusRequest {
+  string message_id = 1;
+}
+
+message GetDeliveryStatusResponse {
+  string message_id = 1;
+  string channel_id = 2;
+  string state = 3;
+  int64 accepted_at_ms = 4;
+  int64 updated_at_ms = 5;
+  string error = 6;
+}
+
+message EditMessageRequest {
+  string channel_id = 1;
+  string target_id = 2;
+  string message_id = 3;
+  string content = 4;
+  string state = 5;
+  map<string, string> metadata = 6;
+}
+
+message EditMessageResponse {
+  string message_id = 1;
+  string state = 2;
+}
+
+message SendPlaceholderRequest {
+  string channel_id = 1;
+  string target_id = 2;
+  string reply_to_message_id = 3;
+  string content = 4;
+}
+
+message SendPlaceholderResponse {
+  string message_id = 1;
+}
+
+message StartTypingRequest {
+  string channel_id = 1;
+  string target_id = 2;
+}
+
+message StartTypingResponse {
+  string action_id = 1;
+}
+
+message StopTypingRequest {
+  string action_id = 1;
+}
+message StopTypingResponse {
+  bool stopped = 1;
+}
+
+message ReactToMessageRequest {
+  string channel_id = 1;
+  string target_id = 2;
+  string message_id = 3;
+  string reaction = 4;
+}
+
+message ReactToMessageResponse {
+  string action_id = 1;
+}
+
+message ReactionActionRequest {
+  string action_id = 1;
+}
+
+message ReactionActionResponse {
+  bool applied = 1;
+}
+
+message StartStreamingMessageRequest {
+  string channel_id = 1;
+  string target_id = 2;
+  string reply_to_message_id = 3;
+  string content = 4;
+}
+
+message StartStreamingMessageResponse {
+  string message_id = 1;
+}
+
+message UpdateStreamingMessageRequest {
+  string channel_id = 1;
+  string target_id = 2;
+  string message_id = 3;
+  string content = 4;
+}
+
+message UpdateStreamingMessageResponse {
+  bool updated = 1;
+}
+
+message FinishStreamingMessageRequest {
+  string channel_id = 1;
+  string target_id = 2;
+  string message_id = 3;
+  string content = 4;
+}
+
+message FinishStreamingMessageResponse {
+  bool finished = 1;
+}
+
+message MediaPart {
+  string type = 1;
+  string ref = 2;
+  string caption = 3;
+  string filename = 4;
+  string content_type = 5;
+}
+
+message SubscribeInboundRequest {
+  repeated string channel_ids = 1;
+}
+
+message SubscribeInboundResponse {
+  InboundMessage message = 1;
+}
+
+message InboundMessage {
+  string channel_id = 1;
+  string message_id = 2;
+  string chat_id = 3;
+  string sender_id = 4;
+  string sender_name = 5;
+  string content = 6;
+  map<string, string> metadata = 7;
+  int64 received_at_ms = 8;
+  repeated MediaPart media = 9;
+}
+
+message UploadMediaRequest {
+  string filename = 1;
+  string content_type = 2;
+  bytes content = 3;
+}
+
+message UploadMediaResponse {
+  MediaPart media = 1;
+}
+
+message DownloadMediaRequest {
+  string ref = 1;
+}
+
+message DownloadMediaResponse {
+  string filename = 1;
+  string content_type = 2;
+  bytes content = 3;
+}
+
+message ReleaseMediaRequest { string ref = 1; }
+message ReleaseMediaResponse { bool released = 1; }

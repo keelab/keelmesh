@@ -1,0 +1,162 @@
+{
+  "schemaVersion": "v3",
+  "generatorProtocol": "v1",
+  "source": "channel/v1/channel.proto",
+  "package": "channel.v1",
+  "goImportPath": "github.com/keelab/keelmesh/gen/channel/v1",
+  "goPackage": "channelv1",
+  "services": [
+    {
+      "name": "channel.v1.ChannelService",
+      "goName": "ChannelService",
+      "methods": [
+        {
+          "name": "ListChannels",
+          "operation": "/channel.v1.ChannelService/ListChannels",
+          "kind": "unary",
+          "input": "channel.v1.ListChannelsRequest",
+          "output": "channel.v1.ListChannelsResponse"
+        },
+        {
+          "name": "GetChannel",
+          "operation": "/channel.v1.ChannelService/GetChannel",
+          "kind": "unary",
+          "input": "channel.v1.GetChannelRequest",
+          "output": "channel.v1.GetChannelResponse"
+        },
+        {
+          "name": "ProbeChannel",
+          "operation": "/channel.v1.ChannelService/ProbeChannel",
+          "kind": "unary",
+          "input": "channel.v1.ProbeChannelRequest",
+          "output": "channel.v1.ProbeChannelResponse"
+        },
+        {
+          "name": "SendMessage",
+          "operation": "/channel.v1.ChannelService/SendMessage",
+          "kind": "unary",
+          "input": "channel.v1.SendMessageRequest",
+          "output": "channel.v1.SendMessageResponse"
+        },
+        {
+          "name": "SendMedia",
+          "operation": "/channel.v1.ChannelService/SendMedia",
+          "kind": "unary",
+          "input": "channel.v1.SendMediaRequest",
+          "output": "channel.v1.SendMediaResponse"
+        },
+        {
+          "name": "GetDeliveryStatus",
+          "operation": "/channel.v1.ChannelService/GetDeliveryStatus",
+          "kind": "unary",
+          "input": "channel.v1.GetDeliveryStatusRequest",
+          "output": "channel.v1.GetDeliveryStatusResponse"
+        },
+        {
+          "name": "EditMessage",
+          "operation": "/channel.v1.ChannelService/EditMessage",
+          "kind": "unary",
+          "input": "channel.v1.EditMessageRequest",
+          "output": "channel.v1.EditMessageResponse"
+        },
+        {
+          "name": "SendPlaceholder",
+          "operation": "/channel.v1.ChannelService/SendPlaceholder",
+          "kind": "unary",
+          "input": "channel.v1.SendPlaceholderRequest",
+          "output": "channel.v1.SendPlaceholderResponse"
+        },
+        {
+          "name": "StartTyping",
+          "operation": "/channel.v1.ChannelService/StartTyping",
+          "kind": "unary",
+          "input": "channel.v1.StartTypingRequest",
+          "output": "channel.v1.StartTypingResponse"
+        },
+        {
+          "name": "StopTyping",
+          "operation": "/channel.v1.ChannelService/StopTyping",
+          "kind": "unary",
+          "input": "channel.v1.StopTypingRequest",
+          "output": "channel.v1.StopTypingResponse"
+        },
+        {
+          "name": "ReactToMessage",
+          "operation": "/channel.v1.ChannelService/ReactToMessage",
+          "kind": "unary",
+          "input": "channel.v1.ReactToMessageRequest",
+          "output": "channel.v1.ReactToMessageResponse"
+        },
+        {
+          "name": "CompleteReaction",
+          "operation": "/channel.v1.ChannelService/CompleteReaction",
+          "kind": "unary",
+          "input": "channel.v1.ReactionActionRequest",
+          "output": "channel.v1.ReactionActionResponse"
+        },
+        {
+          "name": "ExpireReaction",
+          "operation": "/channel.v1.ChannelService/ExpireReaction",
+          "kind": "unary",
+          "input": "channel.v1.ReactionActionRequest",
+          "output": "channel.v1.ReactionActionResponse"
+        },
+        {
+          "name": "StartStreamingMessage",
+          "operation": "/channel.v1.ChannelService/StartStreamingMessage",
+          "kind": "unary",
+          "input": "channel.v1.StartStreamingMessageRequest",
+          "output": "channel.v1.StartStreamingMessageResponse"
+        },
+        {
+          "name": "UpdateStreamingMessage",
+          "operation": "/channel.v1.ChannelService/UpdateStreamingMessage",
+          "kind": "unary",
+          "input": "channel.v1.UpdateStreamingMessageRequest",
+          "output": "channel.v1.UpdateStreamingMessageResponse"
+        },
+        {
+          "name": "FinishStreamingMessage",
+          "operation": "/channel.v1.ChannelService/FinishStreamingMessage",
+          "kind": "unary",
+          "input": "channel.v1.FinishStreamingMessageRequest",
+          "output": "channel.v1.FinishStreamingMessageResponse"
+        },
+        {
+          "name": "UploadMedia",
+          "operation": "/channel.v1.ChannelService/UploadMedia",
+          "kind": "unary",
+          "input": "channel.v1.UploadMediaRequest",
+          "output": "channel.v1.UploadMediaResponse"
+        },
+        {
+          "name": "DownloadMedia",
+          "operation": "/channel.v1.ChannelService/DownloadMedia",
+          "kind": "unary",
+          "input": "channel.v1.DownloadMediaRequest",
+          "output": "channel.v1.DownloadMediaResponse"
+        },
+        {
+          "name": "ReleaseMedia",
+          "operation": "/channel.v1.ChannelService/ReleaseMedia",
+          "kind": "unary",
+          "input": "channel.v1.ReleaseMediaRequest",
+          "output": "channel.v1.ReleaseMediaResponse"
+        },
+        {
+          "name": "SubscribeInbound",
+          "operation": "/channel.v1.ChannelService/SubscribeInbound",
+          "kind": "server-stream",
+          "input": "channel.v1.SubscribeInboundRequest",
+          "output": "channel.v1.SubscribeInboundResponse"
+        }
+      ]
+    }
+  ],
+  "listeners": [
+    {
+      "transport": "grpc",
+      "service": "channel.v1.ChannelService"
+    }
+  ]
+}

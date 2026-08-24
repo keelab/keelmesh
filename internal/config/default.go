@@ -13,7 +13,7 @@ import (
 
 func DefaultChannel() ChannelConfig {
 	return ChannelConfig{
-		AppName:         "channelcore",
+		AppName:         "xxx",
 		Environment:     "development",
 		GRPCAddr:        "0.0.0.0:9010",
 		GRPCOpsAddr:     "127.0.0.1:9011",
@@ -42,7 +42,7 @@ func DefaultSQL() sqlruntime.ConnectionConfig {
 		Pool: sqlruntime.Config{
 			Owns:        true,
 			System:      "postgresql",
-			Name:        "channelcore",
+			Name:        "xxx",
 			MaxIdle:     4,
 			MaxOpen:     16,
 			MaxIdleTime: 5 * time.Minute,
@@ -55,7 +55,7 @@ func DefaultRedis() redisruntime.Config {
 	return redisruntime.Config{
 		Mode:               redisruntime.ModeStandalone,
 		Addresses:          []string{"127.0.0.1:6379"},
-		ClientName:         "channelcore",
+		ClientName:         "xxx",
 		Protocol:           3,
 		MaxRetries:         2,
 		DialTimeout:        2 * time.Second,
@@ -70,7 +70,7 @@ func DefaultRedis() redisruntime.Config {
 
 func DefaultOutbox() outboxruntime.RuntimeConfig {
 	return outboxruntime.RuntimeConfig{
-		Table:          "channelcore_outbox",
+		Table:          "xxx_outbox",
 		Isolation:      "read-committed",
 		PollInterval:   250 * time.Millisecond,
 		ErrorDelay:     time.Second,

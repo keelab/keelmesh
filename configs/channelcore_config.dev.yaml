@@ -15,13 +15,16 @@ runtime:
       slow_threshold: 500ms
       disable_slow_logs: false
   ops_health_only: true
-  dependencies_enabled: false
+  dependencies_enabled: true
   secret_root: .secrets
   channels:
     - id: feishu
       kind: feishu
-      enabled: false
+      enabled: true
       media_root: .data/media
+      app_id: cli_a924157cfd38dbc0
+      # Inject locally via KEELMESH_CHANNELCORE_RUNTIME__CHANNELS__0__APP_SECRET.
+      app_secret: ""
 components:
   sql:
     primary:
@@ -38,8 +41,10 @@ components:
   redis:
     cache:
       mode: standalone
-      addresses: ["127.0.0.1:6379"]
+      addresses: ["192.168.0.107:4501"]
       clientName: channelcore
+      username: default
+      passwordRef: secret://file/redis-password
       protocol: 3
       maxRetries: 2
       dialTimeout: 2s

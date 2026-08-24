@@ -12,6 +12,7 @@ import (
 	"github.com/keelab/keelith/app"
 	"github.com/keelab/keelith/ops"
 	kserver "github.com/keelab/keelith/server"
+	"github.com/keelab/keelmesh/internal/infrastructure/messaging/delivery"
 )
 
 // Resources owns the optional external dependency graph.
@@ -21,6 +22,7 @@ type Resources struct {
 	redis      *kredis.Client
 	cache      *kcache.Client
 	outbox     *koutbox.Runtime
+	delivery   *delivery.Router
 	components []app.Component
 	servers    []kserver.Server
 	statuses   []ops.RuntimeStatusRegistration

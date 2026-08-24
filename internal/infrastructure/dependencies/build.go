@@ -5,9 +5,11 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/google/uuid"
 	kcache "github.com/keelab/contrib/cache/redis"
 	kgorm "github.com/keelab/contrib/data/gorm"
 	ksql "github.com/keelab/contrib/data/sql"
+	koutbox "github.com/keelab/contrib/data/sql/outbox"
 	kredis "github.com/keelab/contrib/redis"
 	"github.com/keelab/keelith/app"
 	"github.com/keelab/keelith/observability"
@@ -15,6 +17,7 @@ import (
 	"github.com/keelab/keelith/secret"
 	secretfile "github.com/keelab/keelith/secret/file"
 	"github.com/keelab/keelmesh/internal/config"
+	"github.com/keelab/keelmesh/internal/infrastructure/messaging/delivery"
 	"gorm.io/driver/postgres"
 	gormio "gorm.io/gorm"
 
@@ -106,6 +109,23 @@ func Build(ctx context.Context, loaded config.ChannelLoaded, telemetry *observab
 		return rollback(fmt.Errorf("dependencies: build Redis cache: %w", err))
 	}
 	resources.cache = cache
+	deliveryRouter := delivery.NewRouter()
+	outboxConfig, ok := loaded.Outbox.Current()
+	if !ok {
+		return rollback(fmt.Errorf("dependencies: Outbox config is unavailable"))
+	}
+	outboxRuntime, err := koutbox.NewRuntime(
+		outboxConfig,
+		"outbox.delivery",
+		loaded.Runtime.AppName+"-"+uuid.NewString(),
+		database.DB(),
+		deliveryRouter,
+	)
+	if err != nil {
+		return rollback(fmt.Errorf("dependencies: build PostgreSQL Outbox: %w", err))
+	}
+	resources.outbox = outboxRuntime
+	resources.delivery = deliveryRouter
 
 	resources.components = []app.Component{
 		app.ComponentFunc{
@@ -128,8 +148,8 @@ func Build(ctx context.Context, loaded config.ChannelLoaded, telemetry *observab
 		{Name: "primary", Kind: "sql", Provider: sqlStatus(database)},
 		{Name: "primary", Kind: "gorm", Provider: kgorm.RuntimeStatus(gormDatabase)},
 		{Name: "cache", Kind: "redis", Provider: redisStatus(redisClient)},
-		//{Name: "events", Kind: "outbox", Provider: outboxStatus(outboxRuntime.Dispatcher())},
+		{Name: "delivery", Kind: "outbox", Provider: outboxStatus(outboxRuntime.Dispatcher())},
 	}
-	//resources.servers = []kserver.Server{outboxRuntime.Dispatcher()}
+	resources.servers = append(resources.servers, outboxRuntime.Dispatcher())
 	return resources, nil
 }

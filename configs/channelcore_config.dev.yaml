@@ -1,0 +1,58 @@
+runtime:
+  app_name: channelcore
+  environment: development
+  grpc_address: "0.0.0.0:9010"
+  grpc_ops_address: "127.0.0.1:9011"
+  shutdown_timeout: 10s
+  logging:
+    level: debug
+    format: json
+    add_source: false
+  observability:
+    request_logs:
+      enabled: true
+      success_sample_every: 1
+      slow_threshold: 500ms
+      disable_slow_logs: false
+  ops_health_only: true
+  dependencies_enabled: false
+  secret_root: .secrets
+components:
+  sql:
+    primary:
+      driver: pgx
+      dsnReference: secret://file/postgres-dsn
+      pool:
+        owns: true
+        system: postgresql
+        name: channelcore
+        maxIdle: 4
+        maxOpen: 16
+        maxIdleTime: 5m
+        maxLifetime: 30m
+  redis:
+    cache:
+      mode: standalone
+      addresses: ["127.0.0.1:6379"]
+      clientName: channelcore
+      protocol: 3
+      maxRetries: 2
+      dialTimeout: 2s
+      readTimeout: 1s
+      writeTimeout: 1s
+      poolTimeout: 2s
+      poolSize: 16
+      minIdleConnections: 1
+      maxIdleConnections: 8
+  outbox:
+    delivery:
+      table: channelcore_outbox
+      isolation: read-committed
+      pollInterval: 250ms
+      errorDelay: 1s
+      leasettl: 30s
+      publishTimeout: 10s
+      batchSize: 100
+      maxAttempts: 20
+      retryBase: 1s
+      retryMax: 1m

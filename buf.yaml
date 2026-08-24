@@ -1,0 +1,11 @@
+version: v2
+modules:
+  - path: api/proto
+deps:
+  - buf.build/googleapis/googleapis:c17df5b2beca46928cc87d5656bd5343
+lint:
+  use:
+    - STANDARD
+breaking:
+  use:
+    - FILE

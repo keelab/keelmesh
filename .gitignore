@@ -1,0 +1,21 @@
+# Build output
+/bin/
+/dist/
+/coverage.out
+/*.test
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+/configs/config.local.yaml
+/.secrets/
+
+# IDE and operating-system files
+.DS_Store
+.vscode/
+.idea/*
+.idea/workspace.xml
+.idea/tasks.xml
+
+# Generated API code is committed so clean clones and container builds compile.

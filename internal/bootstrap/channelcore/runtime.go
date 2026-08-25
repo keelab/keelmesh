@@ -201,7 +201,7 @@ func NewRuntime(ctx context.Context, output io.Writer) (*Runtime, error) {
 	}, nil
 }
 
-func mediaStoreFor(root string) domain.MediaRepository {
+func mediaStoreFor(root string) domain.MediaDomain {
 	if root == "" {
 		return nil
 	}

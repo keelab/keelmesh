@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/keelab/keelmesh/internal/domain"
+	"github.com/keelab/keelmesh/internal/platform/clock"
 )
 
 func (r *Repository) Start(ctx context.Context) error {
@@ -126,14 +127,14 @@ func (r *Repository) runWorker(ctx context.Context, worker *channelWorker) {
 	}
 }
 func (r *Repository) sendWithRetry(ctx context.Context, worker *channelWorker, message domain.Outbound) {
-	r.recordDelivery(message.ID, message.ChannelID, domain.DeliverySending, time.Now().UTC(), "")
+	r.recordDelivery(message.ID, message.ChannelID, domain.DeliverySending, clock.UTC(), "")
 	maxRetries := worker.channel.Definition().MaxRetries
 	if maxRetries <= 0 {
 		maxRetries = 4
 	}
 	for attempt := 0; attempt < maxRetries; attempt++ {
 		if err := worker.limiter.wait(ctx); err != nil {
-			r.recordDelivery(message.ID, message.ChannelID, domain.DeliveryCancelled, time.Now().UTC(), err.Error())
+			r.recordDelivery(message.ID, message.ChannelID, domain.DeliveryCancelled, clock.UTC(), err.Error())
 			return
 		}
 		if receipt, err := worker.channel.Send(ctx, message); err == nil {
@@ -141,39 +142,39 @@ func (r *Repository) sendWithRetry(ctx context.Context, worker *channelWorker, m
 			if receipt.MessageID != "" {
 				id = receipt.MessageID
 			}
-			r.recordDelivery(message.ID, message.ChannelID, domain.DeliveryAcknowledged, time.Now().UTC(), "")
+			r.recordDelivery(message.ID, message.ChannelID, domain.DeliveryAcknowledged, clock.UTC(), "")
 			_ = id
 			return
 		} else if attempt == maxRetries-1 {
-			r.recordDelivery(message.ID, message.ChannelID, domain.DeliveryFailed, time.Now().UTC(), err.Error())
+			r.recordDelivery(message.ID, message.ChannelID, domain.DeliveryFailed, clock.UTC(), err.Error())
 			return
 		}
 		if err := waitBackoff(ctx, time.Duration(1<<attempt)*250*time.Millisecond); err != nil {
-			r.recordDelivery(message.ID, message.ChannelID, domain.DeliveryCancelled, time.Now().UTC(), err.Error())
+			r.recordDelivery(message.ID, message.ChannelID, domain.DeliveryCancelled, clock.UTC(), err.Error())
 			return
 		}
 	}
 }
 func (r *Repository) sendMediaWithRetry(ctx context.Context, worker *channelWorker, channel domain.MediaChannel, message domain.OutboundMedia) {
-	r.recordDelivery(message.ID, message.ChannelID, domain.DeliverySending, time.Now().UTC(), "")
+	r.recordDelivery(message.ID, message.ChannelID, domain.DeliverySending, clock.UTC(), "")
 	maxRetries := worker.channel.Definition().MaxRetries
 	if maxRetries <= 0 {
 		maxRetries = 4
 	}
 	for attempt := 0; attempt < maxRetries; attempt++ {
 		if err := worker.limiter.wait(ctx); err != nil {
-			r.recordDelivery(message.ID, message.ChannelID, domain.DeliveryCancelled, time.Now().UTC(), err.Error())
+			r.recordDelivery(message.ID, message.ChannelID, domain.DeliveryCancelled, clock.UTC(), err.Error())
 			return
 		}
 		if _, err := channel.SendMedia(ctx, message); err == nil {
-			r.recordDelivery(message.ID, message.ChannelID, domain.DeliveryAcknowledged, time.Now().UTC(), "")
+			r.recordDelivery(message.ID, message.ChannelID, domain.DeliveryAcknowledged, clock.UTC(), "")
 			return
 		} else if attempt == maxRetries-1 {
-			r.recordDelivery(message.ID, message.ChannelID, domain.DeliveryFailed, time.Now().UTC(), err.Error())
+			r.recordDelivery(message.ID, message.ChannelID, domain.DeliveryFailed, clock.UTC(), err.Error())
 			return
 		}
 		if err := waitBackoff(ctx, time.Duration(1<<attempt)*250*time.Millisecond); err != nil {
-			r.recordDelivery(message.ID, message.ChannelID, domain.DeliveryCancelled, time.Now().UTC(), err.Error())
+			r.recordDelivery(message.ID, message.ChannelID, domain.DeliveryCancelled, clock.UTC(), err.Error())
 			return
 		}
 	}

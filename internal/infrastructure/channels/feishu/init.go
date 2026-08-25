@@ -26,7 +26,7 @@ type Config struct {
 	Burst             int
 	QueueSize         int
 	MaxRetries        int
-	MediaStore        domain.MediaRepository
+	MediaStore        domain.MediaDomain
 }
 
 type Channel struct {

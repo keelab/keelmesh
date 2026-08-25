@@ -41,5 +41,9 @@ func (s *Repository) Store(ctx context.Context, filename, contentType string, so
 		_ = os.Remove(path)
 		return domain.MediaPartEntity{}, fmt.Errorf("channelcore: close media object: %w", err)
 	}
-	return domain.MediaPartEntity{Ref: "media://" + id, Filename: filepath.Base(filename), ContentType: contentType}, nil
+	return domain.MediaPartEntity{
+		Ref:         "media://" + id,
+		Filename:    filepath.Base(filename),
+		ContentType: contentType,
+	}, nil
 }

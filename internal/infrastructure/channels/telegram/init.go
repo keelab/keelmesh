@@ -24,7 +24,7 @@ type Config struct {
 	Proxy           string
 	AllowFrom       []string
 	PlaceholderText string
-	MediaStore      domain.MediaRepository
+	MediaStore      domain.MediaDomain
 	RatePerSecond   float64
 	Burst           int
 	QueueSize       int

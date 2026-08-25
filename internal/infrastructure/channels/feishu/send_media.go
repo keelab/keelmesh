@@ -65,6 +65,7 @@ func (c *Channel) sendImage(ctx context.Context, chatID string, file io.Reader) 
 	}
 	return "", nil
 }
+
 func (c *Channel) sendFile(ctx context.Context, chatID string, file io.Reader, filename, kind string) (string, error) {
 	fileType := "stream"
 	if kind == "audio" {

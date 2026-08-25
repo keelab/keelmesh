@@ -7,6 +7,7 @@ import (
 	"github.com/keelab/keelmesh/internal/domain"
 )
 
+// ListChannels lists all channels.
 func (s *Service) ListChannels(context.Context, *channelv1.ListChannelsRequest) (*channelv1.ListChannelsResponse, error) {
 	definitions := s.runtime.List()
 	channels := make([]*channelv1.ChannelInfo, 0, len(definitions))
@@ -14,9 +15,17 @@ func (s *Service) ListChannels(context.Context, *channelv1.ListChannelsRequest) 
 		channel, _ := s.runtime.Get(definition.ID)
 		channels = append(channels, channelInfo(definition, channel.Running()))
 	}
-	return &channelv1.ListChannelsResponse{Channels: channels}, nil
+	return &channelv1.ListChannelsResponse{
+		Channels: channels,
+	}, nil
 }
 
 func channelInfo(definition domain.DefinitionEntity, running bool) *channelv1.ChannelInfo {
-	return &channelv1.ChannelInfo{Id: definition.ID, Kind: definition.Kind, Enabled: definition.Enabled, Running: running, Capabilities: append([]string(nil), definition.Capabilities...)}
+	return &channelv1.ChannelInfo{
+		Id:           definition.ID,
+		Kind:         definition.Kind,
+		Enabled:      definition.Enabled,
+		Running:      running,
+		Capabilities: append([]string(nil), definition.Capabilities...),
+	}
 }

@@ -28,7 +28,7 @@ type Repository struct {
 	reactions   map[string]reactionAction
 	cancel      context.CancelFunc
 	janitorDone chan struct{}
-	mediaStore  domain.MediaRepository
+	mediaStore  domain.MediaDomain
 }
 type subscription struct {
 	channels map[string]struct{}

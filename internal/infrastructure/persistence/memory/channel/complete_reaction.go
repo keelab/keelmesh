@@ -1,6 +1,8 @@
 package channel
 
-func (r *Repository) CompleteReaction(id string) bool { return r.applyReaction(id, true) }
+func (r *Repository) CompleteReaction(id string) bool {
+	return r.applyReaction(id, true)
+}
 
 func (r *Repository) applyReaction(id string, complete bool) bool {
 	r.mu.Lock()

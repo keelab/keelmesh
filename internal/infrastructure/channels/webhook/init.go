@@ -22,7 +22,7 @@ type Config struct {
 	Path          string
 	Secret        string
 	AllowFrom     []string
-	MediaStore    domain.MediaRepository
+	MediaStore    domain.MediaDomain
 	RatePerSecond float64
 	Burst         int
 	QueueSize     int

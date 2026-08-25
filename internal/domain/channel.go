@@ -26,7 +26,7 @@ type ChannelDomain interface {
 	ReleaseMedia(ctx context.Context, ref string) error
 	Send(ctx context.Context, message Outbound) (ReceiptEntity, error)
 	SendMedia(ctx context.Context, message OutboundMedia) (ReceiptEntity, error)
-	SetMediaStore(store MediaRepository)
+	SetMediaStore(store MediaDomain)
 	Start(ctx context.Context) error
 	Stop(ctx context.Context) error
 	StopTyping(id string) bool
@@ -104,6 +104,7 @@ type DefinitionEntity struct {
 	MaxRetries    int
 }
 type Sink func(Inbound)
+
 type Inbound struct {
 	ChannelID  string
 	MessageID  string

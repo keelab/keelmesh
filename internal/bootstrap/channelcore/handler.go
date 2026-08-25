@@ -19,9 +19,6 @@ type ServiceHandlers struct {
 	di.Roots
 
 	Channel channelv1.ChannelServiceKeelithServer
-	//Order     orderv1.OrderServiceKeelithServer
-	//Inventory inventoryv1.InventoryServiceKeelithServer
-	//Customer  customerv1.CustomerServiceKeelithServer
 	Logger  *slog.Logger
 	Logging *logging.Controller
 	Audit   *audit.Logger

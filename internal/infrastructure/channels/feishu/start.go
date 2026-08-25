@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -37,6 +38,7 @@ func (c *Channel) Start(ctx context.Context, sink domain.Sink) error {
 	}()
 	return nil
 }
+
 func (c *Channel) receive(ctx context.Context, event *larkim.P2MessageReceiveV1) error {
 	if event == nil || event.Event == nil || event.Event.Message == nil {
 		return nil
@@ -59,7 +61,7 @@ func (c *Channel) receive(ctx context.Context, event *larkim.P2MessageReceiveV1)
 			senderID = value(event.Event.Sender.SenderId.UserId)
 		}
 	}
-	if len(c.config.AllowFrom) > 0 && !contains(c.config.AllowFrom, senderID) {
+	if len(c.config.AllowFrom) > 0 && !slices.Contains(c.config.AllowFrom, senderID) {
 		return nil
 	}
 	content := value(message.Content)
@@ -104,6 +106,7 @@ func (c *Channel) receive(ctx context.Context, event *larkim.P2MessageReceiveV1)
 	}
 	return nil
 }
+
 func (c *Channel) ingestInboundImage(ctx context.Context, key string) (domain.MediaPartEntity, error) {
 	if c.config.MediaStore == nil {
 		return domain.MediaPartEntity{}, errors.New("feishu: media store is not configured")
@@ -116,6 +119,9 @@ func (c *Channel) ingestInboundImage(ctx context.Context, key string) (domain.Me
 		return domain.MediaPartEntity{}, fmt.Errorf("feishu: download image failed: code=%d message=%s", response.Code, response.Msg)
 	}
 	part, err := c.config.MediaStore.Store(ctx, key+".png", "image/png", response.File)
+	if err != nil {
+		return domain.MediaPartEntity{}, err
+	}
 	part.Type = "image"
 	return part, err
 }
@@ -146,12 +152,4 @@ func value(value *string) string {
 		return ""
 	}
 	return *value
-}
-func contains(values []string, target string) bool {
-	for _, value := range values {
-		if value == target {
-			return true
-		}
-	}
-	return false
 }

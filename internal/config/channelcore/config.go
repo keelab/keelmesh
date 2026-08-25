@@ -3,9 +3,9 @@ package channelcore
 import (
 	"time"
 
-	sqlruntime "github.com/keelab/contrib/data/sql"
-	outboxruntime "github.com/keelab/contrib/data/sql/outbox"
-	redisruntime "github.com/keelab/contrib/redis"
+	ksql "github.com/keelab/contrib/data/sql"
+	koutbox "github.com/keelab/contrib/data/sql/outbox"
+	kredis "github.com/keelab/contrib/redis"
 	kconfig "github.com/keelab/keelith/config"
 	"github.com/keelab/keelith/observability/logging"
 )
@@ -161,7 +161,7 @@ type Loaded struct {
 	Runtime       Config
 	Manager       *kconfig.Manager
 	RuntimeServer *kconfig.Runtime
-	SQL           *kconfig.Component[sqlruntime.ConnectionConfig]
-	Redis         *kconfig.Component[redisruntime.Config]
-	Outbox        *kconfig.Component[outboxruntime.RuntimeConfig]
+	SQL           *kconfig.Component[ksql.ConnectionConfig]
+	Redis         *kconfig.Component[kredis.Config]
+	Outbox        *kconfig.Component[koutbox.RuntimeConfig]
 }

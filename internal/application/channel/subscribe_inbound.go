@@ -2,7 +2,7 @@ package channel
 
 import (
 	channelv1 "github.com/keelab/keelmesh/gen/channel/v1"
-	channelruntime "github.com/keelab/keelmesh/internal/channelcore"
+	"github.com/keelab/keelmesh/internal/domain"
 )
 
 func (s *Service) SubscribeInbound(request *channelv1.SubscribeInboundRequest, stream channelv1.ChannelService_SubscribeInboundKeelithServer) error {
@@ -22,7 +22,7 @@ func (s *Service) SubscribeInbound(request *channelv1.SubscribeInboundRequest, s
 		}
 	}
 }
-func inboundMessage(message channelruntime.Inbound) *channelv1.InboundMessage {
+func inboundMessage(message domain.Inbound) *channelv1.InboundMessage {
 	media := make([]*channelv1.MediaPart, 0, len(message.Media))
 	for _, part := range message.Media {
 		media = append(media, &channelv1.MediaPart{Type: part.Type, Ref: part.Ref, Caption: part.Caption, Filename: part.Filename, ContentType: part.ContentType})

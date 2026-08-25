@@ -4,11 +4,11 @@ import (
 	"context"
 
 	channelv1 "github.com/keelab/keelmesh/gen/channel/v1"
-	channelruntime "github.com/keelab/keelmesh/internal/channelcore"
+	"github.com/keelab/keelmesh/internal/domain"
 )
 
 func (s *Service) SendMessage(ctx context.Context, request *channelv1.SendMessageRequest) (*channelv1.SendMessageResponse, error) {
-	receipt, err := s.runtime.Send(ctx, channelruntime.Outbound{
+	receipt, err := s.runtime.Send(ctx, domain.Outbound{
 		ID: request.GetIdempotencyKey(), ChannelID: request.GetChannelId(), TargetID: request.GetTargetId(),
 		ReplyToMessageID: request.GetReplyToMessageId(), Content: request.GetContent(), Metadata: request.GetMetadata(),
 		IdempotencyKey: request.GetIdempotencyKey(),

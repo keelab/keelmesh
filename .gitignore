@@ -22,3 +22,4 @@
 # Generated API code is committed so clean clones and container builds compile.
 AGENTS.md
 CLAUDE.md
+configs/*

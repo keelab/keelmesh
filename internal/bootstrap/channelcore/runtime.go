@@ -16,9 +16,8 @@ import (
 	"github.com/keelab/keelith/observability/logging"
 	"github.com/keelab/keelith/ops"
 	"github.com/keelab/keelith/service"
-	channelruntime "github.com/keelab/keelmesh/internal/channelcore"
-	"github.com/keelab/keelmesh/internal/config"
-	"github.com/keelab/keelmesh/internal/infrastructure/channels/devopspublish"
+	"github.com/keelab/keelmesh/internal/config/channelcore"
+	"github.com/keelab/keelmesh/internal/domain"
 	"github.com/keelab/keelmesh/internal/infrastructure/channels/dingtalk"
 	"github.com/keelab/keelmesh/internal/infrastructure/channels/feishu"
 	"github.com/keelab/keelmesh/internal/infrastructure/channels/qq"
@@ -26,13 +25,15 @@ import (
 	"github.com/keelab/keelmesh/internal/infrastructure/channels/webhook"
 	"github.com/keelab/keelmesh/internal/infrastructure/channels/wecom"
 	"github.com/keelab/keelmesh/internal/infrastructure/dependencies"
+	"github.com/keelab/keelmesh/internal/infrastructure/persistence/memory/channel"
+	"github.com/keelab/keelmesh/internal/infrastructure/persistence/memory/media"
 	"github.com/keelab/keelmesh/internal/observability"
 )
 
-type ChannelRuntime struct {
-	Config   config.ChannelConfig
+type Runtime struct {
+	Config   channelcore.Config
 	Metadata metadata.Policy
-	Loaded   config.ChannelLoaded
+	Loaded   channelcore.Loaded
 
 	Health     *health.Registry
 	Telemetry  *keelithobs.Bundle
@@ -42,11 +43,11 @@ type ChannelRuntime struct {
 	Graph      *di.Graph
 	Resources  *dependencies.Resources
 	Catalog    *ops.RuntimeCatalog
-	Channels   *channelruntime.Runtime
+	Channels   domain.ChannelDomain
 }
 
-func NewRuntime(ctx context.Context, output io.Writer) (*ChannelRuntime, error) {
-	loaded, err := config.LoadChannel(ctx, "configs/channelcore_config.dev.yaml")
+func NewRuntime(ctx context.Context, output io.Writer) (*Runtime, error) {
+	loaded, err := channelcore.Loade(ctx, "configs/channelcore_config.dev.yaml")
 	if err != nil {
 		return nil, fmt.Errorf("load configuration: %w", err)
 	}
@@ -99,7 +100,7 @@ func NewRuntime(ctx context.Context, output io.Writer) (*ChannelRuntime, error) 
 	if err != nil {
 		return nil, fmt.Errorf("build dependencies: %w", errors.Join(err, telemetry.Shutdown(context.WithoutCancel(ctx))))
 	}
-	channelRegistry := channelruntime.NewRegistry()
+	channelRegistry := channel.NewRegistry()
 	mediaRoot := ".data/media"
 	for _, definition := range cfg.Channels {
 		if strings.TrimSpace(definition.MediaRoot) != "" {
@@ -109,27 +110,25 @@ func NewRuntime(ctx context.Context, output io.Writer) (*ChannelRuntime, error) 
 	}
 	sharedMediaStore := mediaStoreFor(mediaRoot)
 	for _, definition := range cfg.Channels {
-		var channel channelruntime.Channel
+		var c domain.Channel
 		var buildErr error
 		switch definition.Kind {
 		case "feishu":
-			channel, buildErr = feishu.New(feishu.Config{ID: definition.ID, Enabled: definition.Enabled, AppID: definition.AppID, AppSecret: definition.AppSecret, EncryptKey: definition.EncryptKey, VerificationToken: definition.VerificationToken, AllowFrom: definition.AllowFrom, MediaRoot: definition.MediaRoot, MediaStore: sharedMediaStore, RatePerSecond: definition.RatePerSecond, Burst: definition.Burst, QueueSize: definition.QueueSize, MaxRetries: definition.MaxRetries})
+			c, buildErr = feishu.New(feishu.Config{ID: definition.ID, Enabled: definition.Enabled, AppID: definition.AppID, AppSecret: definition.AppSecret, EncryptKey: definition.EncryptKey, VerificationToken: definition.VerificationToken, AllowFrom: definition.AllowFrom, MediaRoot: definition.MediaRoot, MediaStore: sharedMediaStore, RatePerSecond: definition.RatePerSecond, Burst: definition.Burst, QueueSize: definition.QueueSize, MaxRetries: definition.MaxRetries})
 		case "telegram":
-			channel, buildErr = telegram.New(telegram.Config{ID: definition.ID, Enabled: definition.Enabled, Token: definition.Telegram.Token, BaseURL: definition.Telegram.BaseURL, Proxy: definition.Telegram.Proxy, AllowFrom: definition.Telegram.AllowFrom, PlaceholderText: definition.Telegram.Placeholder.Text, MediaStore: sharedMediaStore, RatePerSecond: definition.RatePerSecond, Burst: definition.Burst, QueueSize: definition.QueueSize, MaxRetries: definition.MaxRetries})
+			c, buildErr = telegram.New(telegram.Config{ID: definition.ID, Enabled: definition.Enabled, Token: definition.Telegram.Token, BaseURL: definition.Telegram.BaseURL, Proxy: definition.Telegram.Proxy, AllowFrom: definition.Telegram.AllowFrom, PlaceholderText: definition.Telegram.Placeholder.Text, MediaStore: sharedMediaStore, RatePerSecond: definition.RatePerSecond, Burst: definition.Burst, QueueSize: definition.QueueSize, MaxRetries: definition.MaxRetries})
 		case "webhook":
-			channel, buildErr = webhook.New(webhook.Config{ID: definition.ID, Enabled: definition.Enabled, OutboundURL: definition.Webhook.OutboundURL, Listen: definition.Webhook.Listen, Path: definition.Webhook.Path, Secret: definition.Webhook.Secret, AllowFrom: definition.Webhook.AllowFrom, MediaStore: sharedMediaStore, RatePerSecond: definition.RatePerSecond, Burst: definition.Burst, QueueSize: definition.QueueSize, MaxRetries: definition.MaxRetries})
-		case "devops_publish":
-			channel, buildErr = devopspublish.New(devopspublish.Config{ID: definition.ID, Enabled: definition.Enabled, ServerURL: definition.DevOpsPublish.ServerURL, AccountID: definition.DevOpsPublish.AccountID, Credential: definition.DevOpsPublish.Credential, AllowFrom: definition.DevOpsPublish.AllowFrom, ReconnectMin: definition.DevOpsPublish.ReconnectMin, ReconnectMax: definition.DevOpsPublish.ReconnectMax, AckTimeout: definition.DevOpsPublish.AckTimeout, MediaStore: sharedMediaStore, RatePerSecond: definition.RatePerSecond, Burst: definition.Burst, QueueSize: definition.QueueSize, MaxRetries: definition.MaxRetries})
+			c, buildErr = webhook.New(webhook.Config{ID: definition.ID, Enabled: definition.Enabled, OutboundURL: definition.Webhook.OutboundURL, Listen: definition.Webhook.Listen, Path: definition.Webhook.Path, Secret: definition.Webhook.Secret, AllowFrom: definition.Webhook.AllowFrom, MediaStore: sharedMediaStore, RatePerSecond: definition.RatePerSecond, Burst: definition.Burst, QueueSize: definition.QueueSize, MaxRetries: definition.MaxRetries})
 		case "dingtalk":
-			channel, buildErr = dingtalk.New(dingtalk.Config{ID: definition.ID, Enabled: definition.Enabled, ClientID: definition.DingTalk.ClientID, ClientSecret: definition.DingTalk.ClientSecret, AllowFrom: definition.DingTalk.AllowFrom, RatePerSecond: definition.RatePerSecond, Burst: definition.Burst, QueueSize: definition.QueueSize, MaxRetries: definition.MaxRetries})
+			c, buildErr = dingtalk.New(dingtalk.Config{ID: definition.ID, Enabled: definition.Enabled, ClientID: definition.DingTalk.ClientID, ClientSecret: definition.DingTalk.ClientSecret, AllowFrom: definition.DingTalk.AllowFrom, RatePerSecond: definition.RatePerSecond, Burst: definition.Burst, QueueSize: definition.QueueSize, MaxRetries: definition.MaxRetries})
 		case "qq":
-			channel, buildErr = qq.New(qq.Config{ID: definition.ID, Enabled: definition.Enabled, AppID: definition.QQ.AppID, AppSecret: definition.QQ.AppSecret, AllowFrom: definition.QQ.AllowFrom, RatePerSecond: definition.RatePerSecond, Burst: definition.Burst, QueueSize: definition.QueueSize, MaxRetries: definition.MaxRetries})
+			c, buildErr = qq.New(qq.Config{ID: definition.ID, Enabled: definition.Enabled, AppID: definition.QQ.AppID, AppSecret: definition.QQ.AppSecret, AllowFrom: definition.QQ.AllowFrom, RatePerSecond: definition.RatePerSecond, Burst: definition.Burst, QueueSize: definition.QueueSize, MaxRetries: definition.MaxRetries})
 		case "wecom":
-			channel, buildErr = wecom.New(wecom.Config{ID: definition.ID, Kind: "wecom", Enabled: definition.Enabled, WebhookURL: definition.WeCom.WebhookURL, Token: definition.WeCom.Token, EncodingAESKey: definition.WeCom.EncodingAESKey, Listen: definition.WeCom.WebhookListen, Path: definition.WeCom.WebhookPath, AllowFrom: definition.WeCom.AllowFrom, MediaStore: sharedMediaStore, RatePerSecond: definition.RatePerSecond, Burst: definition.Burst, QueueSize: definition.QueueSize, MaxRetries: definition.MaxRetries})
+			c, buildErr = wecom.New(wecom.Config{ID: definition.ID, Kind: "wecom", Enabled: definition.Enabled, WebhookURL: definition.WeCom.WebhookURL, Token: definition.WeCom.Token, EncodingAESKey: definition.WeCom.EncodingAESKey, Listen: definition.WeCom.WebhookListen, Path: definition.WeCom.WebhookPath, AllowFrom: definition.WeCom.AllowFrom, MediaStore: sharedMediaStore, RatePerSecond: definition.RatePerSecond, Burst: definition.Burst, QueueSize: definition.QueueSize, MaxRetries: definition.MaxRetries})
 		case "wecom_app":
-			channel, buildErr = wecom.New(wecom.Config{ID: definition.ID, Kind: "wecom_app", Enabled: definition.Enabled, CorpID: definition.WeComApp.CorpID, CorpSecret: definition.WeComApp.CorpSecret, AgentID: definition.WeComApp.AgentID, Token: definition.WeComApp.Token, EncodingAESKey: definition.WeComApp.EncodingAESKey, Listen: definition.WeComApp.WebhookListen, Path: definition.WeComApp.WebhookPath, AllowFrom: definition.WeComApp.AllowFrom, MediaStore: sharedMediaStore, RatePerSecond: definition.RatePerSecond, Burst: definition.Burst, QueueSize: definition.QueueSize, MaxRetries: definition.MaxRetries})
+			c, buildErr = wecom.New(wecom.Config{ID: definition.ID, Kind: "wecom_app", Enabled: definition.Enabled, CorpID: definition.WeComApp.CorpID, CorpSecret: definition.WeComApp.CorpSecret, AgentID: definition.WeComApp.AgentID, Token: definition.WeComApp.Token, EncodingAESKey: definition.WeComApp.EncodingAESKey, Listen: definition.WeComApp.WebhookListen, Path: definition.WeComApp.WebhookPath, AllowFrom: definition.WeComApp.AllowFrom, MediaStore: sharedMediaStore, RatePerSecond: definition.RatePerSecond, Burst: definition.Burst, QueueSize: definition.QueueSize, MaxRetries: definition.MaxRetries})
 		case "wecom_aibot":
-			channel, buildErr = wecom.New(wecom.Config{ID: definition.ID, Kind: "wecom_aibot", Enabled: definition.Enabled, Token: definition.WeComAIBot.Token, EncodingAESKey: definition.WeComAIBot.EncodingAESKey, Listen: definition.WeComAIBot.WebhookListen, Path: definition.WeComAIBot.WebhookPath, AllowFrom: definition.WeComAIBot.AllowFrom, MediaStore: sharedMediaStore, RatePerSecond: definition.RatePerSecond, Burst: definition.Burst, QueueSize: definition.QueueSize, MaxRetries: definition.MaxRetries})
+			c, buildErr = wecom.New(wecom.Config{ID: definition.ID, Kind: "wecom_aibot", Enabled: definition.Enabled, Token: definition.WeComAIBot.Token, EncodingAESKey: definition.WeComAIBot.EncodingAESKey, Listen: definition.WeComAIBot.WebhookListen, Path: definition.WeComAIBot.WebhookPath, AllowFrom: definition.WeComAIBot.AllowFrom, MediaStore: sharedMediaStore, RatePerSecond: definition.RatePerSecond, Burst: definition.Burst, QueueSize: definition.QueueSize, MaxRetries: definition.MaxRetries})
 		default:
 			if definition.Enabled {
 				return nil, fmt.Errorf("unsupported enabled channel kind %q", definition.Kind)
@@ -139,11 +138,11 @@ func NewRuntime(ctx context.Context, output io.Writer) (*ChannelRuntime, error) 
 		if buildErr != nil {
 			return nil, fmt.Errorf("build channel %q: %w", definition.ID, buildErr)
 		}
-		if err := channelRegistry.Register(channel); err != nil {
+		if err := channelRegistry.Register(c); err != nil {
 			return nil, fmt.Errorf("register channel %q: %w", definition.ID, err)
 		}
 	}
-	channels, err := channelruntime.NewRuntime(channelRegistry)
+	channels, err := channel.NewRepository(channelRegistry)
 	if err != nil {
 		return nil, fmt.Errorf("build channel runtime: %w", err)
 	}
@@ -186,7 +185,7 @@ func NewRuntime(ctx context.Context, output io.Writer) (*ChannelRuntime, error) 
 			),
 		)
 	}
-	return &ChannelRuntime{
+	return &Runtime{
 		Config:     cfg,
 		Loaded:     loaded,
 		Health:     healthRegistry,
@@ -202,11 +201,11 @@ func NewRuntime(ctx context.Context, output io.Writer) (*ChannelRuntime, error) 
 	}, nil
 }
 
-func mediaStoreFor(root string) channelruntime.MediaStore {
+func mediaStoreFor(root string) domain.MediaRepository {
 	if root == "" {
 		return nil
 	}
-	store, err := channelruntime.NewFileMediaStore(root)
+	store, err := media.NewRepository(root)
 	if err != nil {
 		return nil
 	}
@@ -214,13 +213,13 @@ func mediaStoreFor(root string) channelruntime.MediaStore {
 }
 
 // Close releases construction-owned DI resources and external clients.
-func (runtime *ChannelRuntime) Close(ctx context.Context) error {
-	if runtime == nil {
+func (r *Runtime) Close(ctx context.Context) error {
+	if r == nil {
 		return nil
 	}
 	var graphErr error
-	if runtime.Graph != nil {
-		graphErr = runtime.Graph.Close(ctx)
+	if r.Graph != nil {
+		graphErr = r.Graph.Close(ctx)
 	}
-	return errors.Join(graphErr, runtime.Resources.Shutdown(ctx))
+	return errors.Join(graphErr, r.Resources.Shutdown(ctx))
 }

@@ -16,7 +16,7 @@ import (
 	"github.com/keelab/keelith/ops"
 	"github.com/keelab/keelith/secret"
 	secretfile "github.com/keelab/keelith/secret/file"
-	"github.com/keelab/keelmesh/internal/config"
+	"github.com/keelab/keelmesh/internal/config/channelcore"
 	"github.com/keelab/keelmesh/internal/infrastructure/messaging/delivery"
 	"gorm.io/driver/postgres"
 	gormio "gorm.io/gorm"
@@ -27,7 +27,7 @@ import (
 
 // Build constructs clients without touching the network. Connectivity checks
 // run later inside app.App's startup rollback boundary.
-func Build(ctx context.Context, loaded config.ChannelLoaded, telemetry *observability.Bundle) (*Resources, error) {
+func Build(ctx context.Context, loaded channelcore.Loaded, telemetry *observability.Bundle) (*Resources, error) {
 	resources := &Resources{}
 	if !loaded.Runtime.DependenciesEnabled {
 		return resources, nil

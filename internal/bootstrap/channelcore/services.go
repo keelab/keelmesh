@@ -9,8 +9,8 @@ import (
 	"github.com/keelab/keelith/observability/logging/audit"
 	"github.com/keelab/keelith/service"
 	channelv1 "github.com/keelab/keelmesh/gen/channel/v1"
-	channelruntime "github.com/keelab/keelmesh/internal/channelcore"
-	"github.com/keelab/keelmesh/internal/config"
+	"github.com/keelab/keelmesh/internal/config/channelcore"
+	"github.com/keelab/keelmesh/internal/domain"
 	"github.com/keelab/keelmesh/internal/infrastructure/dependencies"
 )
 
@@ -19,11 +19,11 @@ import (
 // this composition root only constructs implementations and protocol policy.
 func newServiceProfile(
 	ctx context.Context,
-	loaded config.ChannelLoaded,
+	loaded channelcore.Loaded,
 	resources *dependencies.Resources,
 	loggingDependencies logging.Dependencies,
 	auditLogger *audit.Logger,
-	channels *channelruntime.Runtime,
+	channels domain.ChannelDomain,
 ) (*di.Graph, *service.Profile, error) {
 	graph, handlers, err := newServiceHandlers(ctx, loaded.Runtime, resources, channels, loggingDependencies, auditLogger)
 	if err != nil {

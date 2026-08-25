@@ -7,5 +7,7 @@ import (
 )
 
 func (s *Service) CompleteReaction(_ context.Context, request *channelv1.ReactionActionRequest) (*channelv1.ReactionActionResponse, error) {
-	return &channelv1.ReactionActionResponse{Applied: s.runtime.CompleteReaction(request.GetActionId())}, nil
+	return &channelv1.ReactionActionResponse{
+		Applied: s.runtime.CompleteReaction(request.GetActionId()),
+	}, nil
 }

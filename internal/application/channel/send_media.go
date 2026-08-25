@@ -4,15 +4,15 @@ import (
 	"context"
 
 	channelv1 "github.com/keelab/keelmesh/gen/channel/v1"
-	channelruntime "github.com/keelab/keelmesh/internal/channelcore"
+	"github.com/keelab/keelmesh/internal/domain"
 )
 
 func (s *Service) SendMedia(ctx context.Context, request *channelv1.SendMediaRequest) (*channelv1.SendMediaResponse, error) {
-	parts := make([]channelruntime.MediaPart, 0, len(request.GetParts()))
+	parts := make([]domain.MediaPartEntity, 0, len(request.GetParts()))
 	for _, part := range request.GetParts() {
-		parts = append(parts, channelruntime.MediaPart{Type: part.GetType(), Ref: part.GetRef(), Caption: part.GetCaption(), Filename: part.GetFilename(), ContentType: part.GetContentType()})
+		parts = append(parts, domain.MediaPartEntity{Type: part.GetType(), Ref: part.GetRef(), Caption: part.GetCaption(), Filename: part.GetFilename(), ContentType: part.GetContentType()})
 	}
-	receipt, err := s.runtime.SendMedia(ctx, channelruntime.OutboundMedia{ID: request.GetIdempotencyKey(), ChannelID: request.GetChannelId(), TargetID: request.GetTargetId(), Parts: parts, Metadata: request.GetMetadata(), IdempotencyKey: request.GetIdempotencyKey()})
+	receipt, err := s.runtime.SendMedia(ctx, domain.OutboundMedia{ID: request.GetIdempotencyKey(), ChannelID: request.GetChannelId(), TargetID: request.GetTargetId(), Parts: parts, Metadata: request.GetMetadata(), IdempotencyKey: request.GetIdempotencyKey()})
 	if err != nil {
 		return nil, err
 	}

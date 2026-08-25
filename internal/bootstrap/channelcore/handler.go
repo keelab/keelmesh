@@ -9,8 +9,8 @@ import (
 	"github.com/keelab/keelith/observability/logging/audit"
 	channelv1 "github.com/keelab/keelmesh/gen/channel/v1"
 	"github.com/keelab/keelmesh/internal/application/channel"
-	channelruntime "github.com/keelab/keelmesh/internal/channelcore"
-	"github.com/keelab/keelmesh/internal/config"
+	"github.com/keelab/keelmesh/internal/config/channelcore"
+	"github.com/keelab/keelmesh/internal/domain"
 	"github.com/keelab/keelmesh/internal/infrastructure/dependencies"
 )
 
@@ -30,15 +30,15 @@ type ServiceHandlers struct {
 // ServiceInputs contains the stable process-scoped values shared by business
 // DI modules. It must not be used as a general-purpose service locator.
 type ServiceInputs struct {
-	Config    config.ChannelConfig
+	Config    channelcore.Config
 	Resources *dependencies.Resources
 	Logger    *slog.Logger
 	Logging   *logging.Controller
 	Audit     *audit.Logger
-	Channels  *channelruntime.Runtime
+	Channels  domain.ChannelDomain
 }
 
-func newServiceHandlers(ctx context.Context, cfg config.ChannelConfig, resources *dependencies.Resources, channels *channelruntime.Runtime, loggingDependencies logging.Dependencies, auditLogger *audit.Logger) (*di.Graph, ServiceHandlers, error) {
+func newServiceHandlers(ctx context.Context, cfg channelcore.Config, resources *dependencies.Resources, channels domain.ChannelDomain, loggingDependencies logging.Dependencies, auditLogger *audit.Logger) (*di.Graph, ServiceHandlers, error) {
 	inputs := ServiceInputs{
 		Config: cfg, Resources: resources,
 		Logger:   loggingDependencies.Logger,
@@ -59,7 +59,7 @@ func ServiceModule(inputs ServiceInputs) di.Module {
 		di.Value(inputs.Logging),
 		di.Value(inputs.Audit),
 		di.IncludePlugins(plugins...),
-		di.Value(inputs.Channels),
+		di.Value(inputs.Channels, di.As((*domain.ChannelDomain)(nil))),
 		di.Provide(channel.New, di.As((*channelv1.ChannelServiceKeelithServer)(nil))),
 		di.Export((*channelv1.ChannelServiceKeelithServer)(nil)),
 		di.Export((**slog.Logger)(nil)),

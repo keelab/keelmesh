@@ -20,7 +20,7 @@ type appServer interface {
 	kserver.Named
 }
 
-func buildApp(ctx context.Context, runtime *ChannelRuntime, apiServer appServer, opsAddress string, surface *service.Surface) error {
+func buildApp(ctx context.Context, runtime *Runtime, apiServer appServer, opsAddress string, surface *service.Surface) error {
 	registry, err := service.NewSurfaceRegistry(surface)
 	if err != nil {
 		_ = runtime.Close(context.WithoutCancel(ctx))

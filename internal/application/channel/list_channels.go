@@ -4,7 +4,7 @@ import (
 	"context"
 
 	channelv1 "github.com/keelab/keelmesh/gen/channel/v1"
-	channelruntime "github.com/keelab/keelmesh/internal/channelcore"
+	"github.com/keelab/keelmesh/internal/domain"
 )
 
 func (s *Service) ListChannels(context.Context, *channelv1.ListChannelsRequest) (*channelv1.ListChannelsResponse, error) {
@@ -17,6 +17,6 @@ func (s *Service) ListChannels(context.Context, *channelv1.ListChannelsRequest) 
 	return &channelv1.ListChannelsResponse{Channels: channels}, nil
 }
 
-func channelInfo(definition channelruntime.Definition, running bool) *channelv1.ChannelInfo {
+func channelInfo(definition domain.DefinitionEntity, running bool) *channelv1.ChannelInfo {
 	return &channelv1.ChannelInfo{Id: definition.ID, Kind: definition.Kind, Enabled: definition.Enabled, Running: running, Capabilities: append([]string(nil), definition.Capabilities...)}
 }

@@ -110,18 +110,27 @@ func (c *Channel) uploadMedia(ctx context.Context, token string, part domain.Med
 		return "", err
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
 	var result struct {
 		ErrCode int    `json:"errcode"`
 		ErrMsg  string `json:"errmsg"`
 		MediaID string `json:"media_id"`
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+	value, err := c.client.Do(ctx, "wecom", "uploadMedia", req, func(_ context.Context, response *http.Response) (any, error) {
+		if err := json.NewDecoder(response.Body).Decode(&result); err != nil {
+			return nil, err
+		}
+		return result, nil
+	})
+	if err != nil {
 		return "", err
+	}
+	result, ok := value.(struct {
+		ErrCode int    `json:"errcode"`
+		ErrMsg  string `json:"errmsg"`
+		MediaID string `json:"media_id"`
+	})
+	if !ok {
+		return "", fmt.Errorf("wecom: media upload unexpected response type %T", value)
 	}
 	if result.ErrCode != 0 || result.MediaID == "" {
 		return "", fmt.Errorf("wecom: media upload failed: %s", result.ErrMsg)

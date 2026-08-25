@@ -17,6 +17,7 @@ func Default() Config {
 		Environment:     "development",
 		GRPCAddr:        "0.0.0.0:9010",
 		GRPCOpsAddr:     "127.0.0.1:9011",
+		HTTPAddr:        "0.0.0.0:9012",
 		ShutdownTimeout: 10 * time.Second,
 		Logging: LoggingConfig{
 			Level:  "info",
@@ -89,6 +90,7 @@ func Validate(config Config) error {
 		"environment":    config.Environment,
 		"grpcAddress":    config.GRPCAddr,
 		"grpcOpsAddress": config.GRPCOpsAddr,
+		"httpAddress":    config.HTTPAddr,
 	} {
 		if strings.TrimSpace(value) == "" || strings.TrimSpace(value) != value {
 			return fmt.Errorf("runtime.%s must not be empty or padded", name)

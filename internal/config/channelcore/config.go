@@ -46,6 +46,7 @@ type Config struct {
 	Environment         string              `config:"environment"`
 	GRPCAddr            string              `config:"grpc_address"`
 	GRPCOpsAddr         string              `config:"grpc_ops_address"`
+	HTTPAddr            string              `config:"http_address"`
 	ShutdownTimeout     time.Duration       `config:"shutdown_timeout"`
 	Logging             LoggingConfig       `config:"logging"`
 	Observability       ObservabilityConfig `config:"observability"`

@@ -12,7 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/http"
+	stdhttp "net/http"
 	"sort"
 	"strings"
 	"time"
@@ -54,17 +54,6 @@ func (c *Channel) Start(ctx context.Context, sink domain.Sink) error {
 	c.sink = sink
 	c.cancel = cancel
 	c.mu.Unlock()
-	if c.config.Listen != "" {
-		mux := http.NewServeMux()
-		mux.HandleFunc(c.config.Path, c.serve)
-		mux.HandleFunc(c.config.Path+"/health", c.health)
-		c.server = &http.Server{Addr: c.config.Listen, Handler: mux, ReadHeaderTimeout: 5 * time.Second}
-		go func() {
-			if err := c.server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-				c.running.Store(false)
-			}
-		}()
-	}
 	c.running.Store(true)
 	if c.config.Kind == "wecom_app" {
 		go c.refreshTokenLoop(runCtx)
@@ -85,32 +74,32 @@ func (c *Channel) refreshTokenLoop(ctx context.Context) {
 	}
 }
 
-func (c *Channel) serve(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
+func (c *Channel) serve(w stdhttp.ResponseWriter, r *stdhttp.Request) {
+	if r.Method == stdhttp.MethodGet {
 		value := r.URL.Query().Get("echostr")
 		if value != "" {
 			if decrypted, err := c.decryptIncoming(value, r); err == nil {
 				value = decrypted
 			} else {
-				http.Error(w, "invalid signature", http.StatusUnauthorized)
+				stdhttp.Error(w, "invalid signature", stdhttp.StatusUnauthorized)
 				return
 			}
 		}
-		w.WriteHeader(200)
+		w.WriteHeader(stdhttp.StatusOK)
 		_, _ = w.Write([]byte(value))
 		return
 	}
-	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", 405)
+	if r.Method != stdhttp.MethodPost {
+		stdhttp.Error(w, "method not allowed", 405)
 		return
 	}
 	body, err := io.ReadAll(io.LimitReader(r.Body, 8<<20))
 	if err != nil {
-		http.Error(w, "invalid body", 400)
+		stdhttp.Error(w, "invalid body", 400)
 		return
 	}
 	if encrypted, err := c.decryptBody(body, r); err != nil {
-		http.Error(w, "invalid encrypted message", http.StatusUnauthorized)
+		stdhttp.Error(w, "invalid encrypted message", stdhttp.StatusUnauthorized)
 		return
 	} else if encrypted != nil {
 		body = encrypted
@@ -120,7 +109,7 @@ func (c *Channel) serve(w http.ResponseWriter, r *http.Request) {
 	if c.config.Kind == "wecom_aibot" {
 		var msg aiMessage
 		if json.Unmarshal(body, &msg) != nil {
-			http.Error(w, "invalid json", 400)
+			stdhttp.Error(w, "invalid json", 400)
 			return
 		}
 		in = domain.Inbound{ChannelID: c.config.ID, MessageID: msg.MsgID, ChatID: msg.ChatID, SenderID: msg.From.UserID, Content: msg.Text.Content, ReceivedAt: time.Now().UTC()}
@@ -135,7 +124,7 @@ func (c *Channel) serve(w http.ResponseWriter, r *http.Request) {
 				ID      string `json:"message_id"`
 			}
 			if json.Unmarshal(body, &obj) != nil {
-				http.Error(w, "invalid message", 400)
+				stdhttp.Error(w, "invalid message", 400)
 				return
 			}
 			in = domain.Inbound{ChannelID: c.config.ID, MessageID: obj.ID, ChatID: obj.Chat, SenderID: obj.From, Content: obj.Content, ReceivedAt: time.Now().UTC()}
@@ -145,12 +134,12 @@ func (c *Channel) serve(w http.ResponseWriter, r *http.Request) {
 	}
 	if in.MessageID != "" {
 		if _, loaded := c.seen.LoadOrStore(in.MessageID, time.Now()); loaded {
-			w.WriteHeader(200)
+			w.WriteHeader(stdhttp.StatusOK)
 			return
 		}
 	}
 	if !allowed(c.config.AllowFrom, in.SenderID) {
-		w.WriteHeader(200)
+		w.WriteHeader(stdhttp.StatusOK)
 		return
 	}
 	if responseURL != "" {
@@ -162,10 +151,10 @@ func (c *Channel) serve(w http.ResponseWriter, r *http.Request) {
 	if sink != nil {
 		sink(in)
 	}
-	w.WriteHeader(200)
+	w.WriteHeader(stdhttp.StatusOK)
 }
 
-func (c *Channel) decryptIncoming(value string, r *http.Request) (string, error) {
+func (c *Channel) decryptIncoming(value string, r *stdhttp.Request) (string, error) {
 	if c.config.Token != "" && !validSignature(c.config.Token, r.URL.Query().Get("msg_signature"), r.URL.Query().Get("timestamp"), r.URL.Query().Get("nonce"), value) {
 		return "", errors.New("wecom: invalid signature")
 	}
@@ -191,7 +180,7 @@ func allowed(list []string, id string) bool {
 	return false
 }
 
-func (c *Channel) decryptBody(body []byte, r *http.Request) ([]byte, error) {
+func (c *Channel) decryptBody(body []byte, r *stdhttp.Request) ([]byte, error) {
 	if c.config.EncodingAESKey == "" {
 		return nil, nil
 	}
@@ -215,12 +204,12 @@ func (c *Channel) decryptBody(body []byte, r *http.Request) ([]byte, error) {
 	return []byte(value), err
 }
 
-func (c *Channel) health(w http.ResponseWriter, _ *http.Request) {
+func (c *Channel) health(w stdhttp.ResponseWriter, _ *stdhttp.Request) {
 	if !c.Running() {
-		http.Error(w, "not running", 503)
+		stdhttp.Error(w, "not running", 503)
 		return
 	}
-	w.WriteHeader(200)
+	w.WriteHeader(stdhttp.StatusOK)
 }
 
 func mediaForXML(msg wecomXML) []domain.MediaPartEntity {

@@ -37,19 +37,29 @@ func (c *Channel) getToken(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
 	var result struct {
 		ErrCode     int    `json:"errcode"`
 		ErrMsg      string `json:"errmsg"`
 		AccessToken string `json:"access_token"`
 		ExpiresIn   int    `json:"expires_in"`
 	}
-	if err = json.NewDecoder(resp.Body).Decode(&result); err != nil {
+	value, err := c.client.Do(ctx, "wecom", "getToken", req, func(_ context.Context, response *http.Response) (any, error) {
+		if err := json.NewDecoder(response.Body).Decode(&result); err != nil {
+			return nil, err
+		}
+		return result, nil
+	})
+	if err != nil {
 		return "", err
+	}
+	result, ok := value.(struct {
+		ErrCode     int    `json:"errcode"`
+		ErrMsg      string `json:"errmsg"`
+		AccessToken string `json:"access_token"`
+		ExpiresIn   int    `json:"expires_in"`
+	})
+	if !ok {
+		return "", fmt.Errorf("wecom: gettoken unexpected response type %T", value)
 	}
 	if result.ErrCode != 0 || result.AccessToken == "" {
 		return "", fmt.Errorf("wecom: gettoken failed: %s", result.ErrMsg)

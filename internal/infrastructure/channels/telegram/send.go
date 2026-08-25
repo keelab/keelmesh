@@ -32,6 +32,7 @@ func (c *Channel) Send(ctx context.Context, msg domain.Outbound) (domain.Receipt
 	}
 	return domain.ReceiptEntity{MessageID: strconv.Itoa(result.MessageID), AcceptedAt: time.Now().UTC()}, nil
 }
+
 func (c *Channel) call(ctx context.Context, method string, params map[string]any, result any) error {
 	body, _ := json.Marshal(params)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+"/"+method, bytes.NewReader(body))
@@ -39,24 +40,27 @@ func (c *Channel) call(ctx context.Context, method string, params map[string]any
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	resp, err := c.client.Do(req)
+	_, err = c.client.Do(ctx, "telegram", method, req, func(_ context.Context, resp *http.Response) (any, error) {
+		data, err := io.ReadAll(io.LimitReader(resp.Body, 8<<20))
+		if err != nil {
+			return nil, err
+		}
+		var envelope apiResponse[json.RawMessage]
+		if err = json.Unmarshal(data, &envelope); err != nil {
+			return nil, err
+		}
+		if !envelope.OK {
+			return nil, fmt.Errorf("telegram %s failed: %s", method, envelope.Description)
+		}
+		if result != nil && len(envelope.Result) > 0 {
+			if err = json.Unmarshal(envelope.Result, result); err != nil {
+				return nil, err
+			}
+		}
+		return nil, nil
+	})
 	if err != nil {
 		return fmt.Errorf("telegram %s: %w", method, err)
-	}
-	defer resp.Body.Close()
-	data, err := io.ReadAll(io.LimitReader(resp.Body, 8<<20))
-	if err != nil {
-		return err
-	}
-	var envelope apiResponse[json.RawMessage]
-	if err = json.Unmarshal(data, &envelope); err != nil {
-		return err
-	}
-	if !envelope.OK {
-		return fmt.Errorf("telegram %s failed: %s", method, envelope.Description)
-	}
-	if result != nil && len(envelope.Result) > 0 {
-		return json.Unmarshal(envelope.Result, result)
 	}
 	return nil
 }

@@ -3,13 +3,16 @@ package webhook
 import (
 	"context"
 	"errors"
-	"net/http"
+	"fmt"
+	stdhttp "net/http"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/keelab/keelith/metadata"
 	"github.com/keelab/keelmesh/internal/domain"
+	"github.com/keelab/keelmesh/internal/transport/http"
 )
 
 var _ domain.Channel = (*Channel)(nil)
@@ -23,6 +26,7 @@ type Config struct {
 	Secret        string
 	AllowFrom     []string
 	MediaStore    domain.MediaDomain
+	HTTPClient    *http.Client
 	RatePerSecond float64
 	Burst         int
 	QueueSize     int
@@ -31,7 +35,6 @@ type Config struct {
 type Channel struct {
 	config  Config
 	client  *http.Client
-	server  *http.Server
 	cancel  context.CancelFunc
 	sink    domain.Sink
 	running atomic.Bool
@@ -46,5 +49,13 @@ func New(cfg Config) (*Channel, error) {
 	if cfg.Path == "" {
 		cfg.Path = "/webhook/" + cfg.ID
 	}
-	return &Channel{config: cfg, client: &http.Client{Timeout: 15 * time.Second}}, nil
+	client := cfg.HTTPClient
+	if client == nil {
+		var err error
+		client, err = http.New(&stdhttp.Client{Timeout: 15 * time.Second}, nil, metadata.Policy{}, nil, 8<<20)
+		if err != nil {
+			return nil, fmt.Errorf("webhook: build HTTP client: %w", err)
+		}
+	}
+	return &Channel{config: cfg, client: client}, nil
 }

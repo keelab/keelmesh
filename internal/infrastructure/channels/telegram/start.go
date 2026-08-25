@@ -152,17 +152,22 @@ func (c *Channel) ingestFile(ctx context.Context, fileID, kind, filename, conten
 	if err != nil {
 		return domain.MediaPartEntity{}, err
 	}
-	response, err := c.client.Do(request)
+	value, err := c.client.Do(ctx, "telegram", "downloadFile", request, func(_ context.Context, response *http.Response) (any, error) {
+		part, err := c.config.MediaStore.Store(ctx, filename, contentType, response.Body)
+		if err != nil {
+			return domain.MediaPartEntity{}, err
+		}
+		part.Type = kind
+		return part, nil
+	})
 	if err != nil {
 		return domain.MediaPartEntity{}, err
 	}
-	defer response.Body.Close()
-	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		return domain.MediaPartEntity{}, fmt.Errorf("telegram: download file returned %s", response.Status)
+	part, ok := value.(domain.MediaPartEntity)
+	if !ok {
+		return domain.MediaPartEntity{}, fmt.Errorf("telegram: unexpected download response type %T", value)
 	}
-	part, err := c.config.MediaStore.Store(ctx, filename, contentType, response.Body)
-	part.Type = kind
-	return part, err
+	return part, nil
 }
 
 func (m *message) FromUsername() string {

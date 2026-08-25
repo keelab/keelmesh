@@ -3,7 +3,6 @@ package webhook
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 )
 
@@ -21,13 +20,8 @@ func (c *Channel) Probe(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode >= 500 {
-		return fmt.Errorf("webhook: probe returned %s", resp.Status)
-	}
-	return nil
+	_, err = c.client.Do(ctx, "webhook", "probe", req, func(_ context.Context, response *http.Response) (any, error) {
+		return nil, nil
+	})
+	return err
 }

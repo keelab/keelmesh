@@ -4,14 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/http"
+	stdhttp "net/http"
 	"net/url"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/keelab/keelith/metadata"
 	"github.com/keelab/keelmesh/internal/domain"
+	"github.com/keelab/keelmesh/internal/transport/http"
 )
 
 var _ domain.Channel = (*Channel)(nil)
@@ -25,6 +27,7 @@ type Config struct {
 	AllowFrom       []string
 	PlaceholderText string
 	MediaStore      domain.MediaDomain
+	HTTPClient      *http.Client
 	RatePerSecond   float64
 	Burst           int
 	QueueSize       int
@@ -53,5 +56,13 @@ func New(cfg Config) (*Channel, error) {
 	if _, err := url.ParseRequestURI(base); err != nil {
 		return nil, fmt.Errorf("telegram: invalid base url: %w", err)
 	}
-	return &Channel{config: cfg, client: &http.Client{Timeout: 45 * time.Second}, baseURL: base + "/bot" + cfg.Token}, nil
+	client := cfg.HTTPClient
+	if client == nil {
+		var err error
+		client, err = http.New(&stdhttp.Client{Timeout: 45 * time.Second}, nil, metadata.Policy{}, nil, 8<<20)
+		if err != nil {
+			return nil, fmt.Errorf("telegram: build HTTP client: %w", err)
+		}
+	}
+	return &Channel{config: cfg, client: client, baseURL: base + "/bot" + cfg.Token}, nil
 }

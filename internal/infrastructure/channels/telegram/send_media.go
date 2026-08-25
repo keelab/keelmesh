@@ -79,17 +79,22 @@ func (c *Channel) upload(ctx context.Context, endpoint, field, target, filename,
 		return "", err
 	}
 	req.Header.Set("Content-Type", mw.FormDataContentType())
-	resp, err := c.client.Do(req)
+	value, err := c.client.Do(ctx, "telegram", endpoint, req, func(_ context.Context, resp *http.Response) (any, error) {
+		var envelope apiResponse[sentMessage]
+		if err := json.NewDecoder(resp.Body).Decode(&envelope); err != nil {
+			return "", err
+		}
+		if !envelope.OK {
+			return "", fmt.Errorf("telegram %s failed: %s", endpoint, envelope.Description)
+		}
+		return strconv.Itoa(envelope.Result.MessageID), nil
+	})
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
-	var envelope apiResponse[sentMessage]
-	if err = json.NewDecoder(resp.Body).Decode(&envelope); err != nil {
-		return "", err
+	messageID, ok := value.(string)
+	if !ok {
+		return "", fmt.Errorf("telegram %s: unexpected response type %T", endpoint, value)
 	}
-	if !envelope.OK {
-		return "", fmt.Errorf("telegram %s failed: %s", endpoint, envelope.Description)
-	}
-	return strconv.Itoa(envelope.Result.MessageID), nil
+	return messageID, nil
 }

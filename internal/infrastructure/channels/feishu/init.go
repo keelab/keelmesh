@@ -3,13 +3,16 @@ package feishu
 import (
 	"context"
 	"errors"
+	stdhttp "net/http"
 	"strings"
 	"sync"
 	"sync/atomic"
 
 	"github.com/keelab/keelmesh/internal/domain"
 	"github.com/keelab/keelmesh/internal/infrastructure/persistence/memory/media"
+	channelhttp "github.com/keelab/keelmesh/internal/transport/http"
 	lark "github.com/larksuite/oapi-sdk-go/v3"
+	larkcore "github.com/larksuite/oapi-sdk-go/v3/core"
 	larkws "github.com/larksuite/oapi-sdk-go/v3/ws"
 )
 
@@ -27,6 +30,7 @@ type Config struct {
 	QueueSize         int
 	MaxRetries        int
 	MediaStore        domain.MediaDomain
+	HTTPClient        *channelhttp.Client
 }
 
 type Channel struct {
@@ -51,5 +55,19 @@ func New(cfg Config) (*Channel, error) {
 		}
 		cfg.MediaStore = store
 	}
-	return &Channel{config: cfg, client: lark.NewClient(cfg.AppID, cfg.AppSecret)}, nil
+	options := make([]lark.ClientOptionFunc, 0, 1)
+	if cfg.HTTPClient != nil {
+		options = append(options, lark.WithHttpClient(&larkHTTPClient{client: cfg.HTTPClient}))
+	}
+	return &Channel{config: cfg, client: lark.NewClient(cfg.AppID, cfg.AppSecret, options...)}, nil
 }
+
+type larkHTTPClient struct {
+	client *channelhttp.Client
+}
+
+func (c *larkHTTPClient) Do(request *stdhttp.Request) (*stdhttp.Response, error) {
+	return c.client.DoRaw(request.Context(), "feishu", request.Method, request)
+}
+
+var _ larkcore.HttpClient = (*larkHTTPClient)(nil)

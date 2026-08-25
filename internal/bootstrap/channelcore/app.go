@@ -70,6 +70,9 @@ func buildApp(ctx context.Context, runtime *Runtime, apiServer appServer, opsAdd
 		return fmt.Errorf("observe API listener: %w", observeErr)
 	}
 	servers = append(servers, observed)
+	if runtime.HTTPServer != nil {
+		servers = append(servers, runtime.HTTPServer)
+	}
 	servers = append(servers, opsServer)
 	application, err := app.New(
 		app.WithHealth(runtime.Health),

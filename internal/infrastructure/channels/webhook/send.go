@@ -8,7 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -37,13 +37,9 @@ func (c *Channel) post(ctx context.Context, target string, body []byte) error {
 		_, _ = mac.Write(body)
 		req.Header.Set("X-Channel-Signature", hex.EncodeToString(mac.Sum(nil)))
 	}
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("webhook: outbound returned %s", resp.Status)
-	}
-	return nil
+	_, err = c.client.Do(ctx, "webhook", "post", req, func(_ context.Context, resp *http.Response) (any, error) {
+		_, _ = io.Copy(io.Discard, resp.Body)
+		return nil, nil
+	})
+	return err
 }

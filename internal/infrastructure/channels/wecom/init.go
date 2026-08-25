@@ -3,13 +3,16 @@ package wecom
 import (
 	"context"
 	"errors"
-	"net/http"
+	"fmt"
+	stdhttp "net/http"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/keelab/keelith/metadata"
 	"github.com/keelab/keelmesh/internal/domain"
+	"github.com/keelab/keelmesh/internal/transport/http"
 )
 
 var _ domain.Channel = (*Channel)(nil)
@@ -33,11 +36,11 @@ type Config struct {
 	QueueSize      int
 	MaxRetries     int
 	MediaStore     domain.MediaDomain
+	HTTPClient     *http.Client
 }
 type Channel struct {
 	config       Config
 	client       *http.Client
-	server       *http.Server
 	cancel       context.CancelFunc
 	sink         domain.Sink
 	running      atomic.Bool
@@ -64,5 +67,13 @@ func New(cfg Config) (*Channel, error) {
 	if cfg.Kind == "wecom_app" && (cfg.CorpID == "" || cfg.CorpSecret == "" || cfg.AgentID == 0) {
 		return nil, errors.New("wecom_app: corp_id, corp_secret and agent_id are required")
 	}
-	return &Channel{config: cfg, client: &http.Client{Timeout: 15 * time.Second}}, nil
+	client := cfg.HTTPClient
+	if client == nil {
+		var err error
+		client, err = http.New(&stdhttp.Client{Timeout: 15 * time.Second}, nil, metadata.Policy{}, nil, 8<<20)
+		if err != nil {
+			return nil, fmt.Errorf("wecom: build HTTP client: %w", err)
+		}
+	}
+	return &Channel{config: cfg, client: client}, nil
 }

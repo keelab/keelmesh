@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"time"
@@ -50,13 +50,9 @@ func (c *Channel) postJSON(ctx context.Context, endpoint string, value any) erro
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("wecom: endpoint returned %s", resp.Status)
-	}
-	return nil
+	_, err = c.client.Do(ctx, "wecom", "post", req, func(_ context.Context, response *http.Response) (any, error) {
+		_, _ = io.Copy(io.Discard, response.Body)
+		return nil, nil
+	})
+	return err
 }

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/keelab/keelmesh/internal/domain"
+	larkevent "github.com/larksuite/oapi-sdk-go/v3/event"
 	larkdispatcher "github.com/larksuite/oapi-sdk-go/v3/event/dispatcher"
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	larkws "github.com/larksuite/oapi-sdk-go/v3/ws"
@@ -24,7 +25,14 @@ func (c *Channel) Start(ctx context.Context, sink domain.Sink) error {
 	}
 	runCtx, cancel := context.WithCancel(ctx)
 	dispatcher := larkdispatcher.NewEventDispatcher(c.config.VerificationToken, c.config.EncryptKey).OnP2MessageReceiveV1(c.receive)
-	ws := larkws.NewClient(c.config.AppID, c.config.AppSecret, larkws.WithEventHandler(dispatcher))
+	if c.config.Logger != nil {
+		dispatcher.InitConfig(larkevent.WithLogger(c.config.Logger))
+	}
+	options := []larkws.ClientOption{larkws.WithEventHandler(dispatcher)}
+	if c.config.Logger != nil {
+		options = append(options, larkws.WithLogger(c.config.Logger))
+	}
+	ws := larkws.NewClient(c.config.AppID, c.config.AppSecret, options...)
 	c.mu.Lock()
 	c.sink = sink
 	c.cancel = cancel

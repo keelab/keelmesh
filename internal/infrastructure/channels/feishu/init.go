@@ -31,6 +31,7 @@ type Config struct {
 	MaxRetries        int
 	MediaStore        domain.MediaDomain
 	HTTPClient        *channelhttp.Client
+	Logger            larkcore.Logger
 }
 
 type Channel struct {
@@ -55,9 +56,12 @@ func New(cfg Config) (*Channel, error) {
 		}
 		cfg.MediaStore = store
 	}
-	options := make([]lark.ClientOptionFunc, 0, 1)
+	options := make([]lark.ClientOptionFunc, 0, 2)
 	if cfg.HTTPClient != nil {
 		options = append(options, lark.WithHttpClient(&larkHTTPClient{client: cfg.HTTPClient}))
+	}
+	if cfg.Logger != nil {
+		options = append(options, lark.WithLogger(cfg.Logger))
 	}
 	return &Channel{config: cfg, client: lark.NewClient(cfg.AppID, cfg.AppSecret, options...)}, nil
 }

@@ -31,7 +31,10 @@ import (
 	"github.com/keelab/keelmesh/internal/infrastructure/persistence/memory/channel"
 	"github.com/keelab/keelmesh/internal/infrastructure/persistence/memory/media"
 	"github.com/keelab/keelmesh/internal/observability"
+	"github.com/keelab/keelmesh/internal/observability/sdklog"
 	http2 "github.com/keelab/keelmesh/internal/transport/http"
+	dingtalklogger "github.com/open-dingtalk/dingtalk-stream-sdk-go/logger"
+	botgo "github.com/tencent-connect/botgo"
 )
 
 type Runtime struct {
@@ -137,6 +140,9 @@ func NewRuntime(ctx context.Context, output io.Writer) (*Runtime, error) {
 	if err != nil {
 		return nil, fmt.Errorf("build wecom HTTP client: %w", errors.Join(err, external.Shutdown(context.WithoutCancel(ctx)), telemetry.Shutdown(context.WithoutCancel(ctx))))
 	}
+	sdkLogger := telemetry.Logger()
+	dingtalklogger.SetLogger(sdklog.NewDingTalk(sdkLogger))
+	botgo.SetLogger(sdklog.NewQQ(sdkLogger))
 	channelRegistry := channel.NewRegistry()
 	mediaRoot := ".data/media"
 	for _, definition := range cfg.Channels {
@@ -151,7 +157,7 @@ func NewRuntime(ctx context.Context, output io.Writer) (*Runtime, error) {
 		var buildErr error
 		switch definition.Kind {
 		case "feishu":
-			c, buildErr = feishu.New(feishu.Config{ID: definition.ID, Enabled: definition.Enabled, AppID: definition.AppID, AppSecret: definition.AppSecret, EncryptKey: definition.EncryptKey, VerificationToken: definition.VerificationToken, AllowFrom: definition.AllowFrom, MediaRoot: definition.MediaRoot, MediaStore: sharedMediaStore, HTTPClient: feishuHTTPClient, RatePerSecond: definition.RatePerSecond, Burst: definition.Burst, QueueSize: definition.QueueSize, MaxRetries: definition.MaxRetries})
+			c, buildErr = feishu.New(feishu.Config{ID: definition.ID, Enabled: definition.Enabled, AppID: definition.AppID, AppSecret: definition.AppSecret, EncryptKey: definition.EncryptKey, VerificationToken: definition.VerificationToken, AllowFrom: definition.AllowFrom, MediaRoot: definition.MediaRoot, MediaStore: sharedMediaStore, HTTPClient: feishuHTTPClient, Logger: sdklog.NewFeishu(sdkLogger), RatePerSecond: definition.RatePerSecond, Burst: definition.Burst, QueueSize: definition.QueueSize, MaxRetries: definition.MaxRetries})
 		case "telegram":
 			c, buildErr = telegram.New(telegram.Config{ID: definition.ID, Enabled: definition.Enabled, Token: definition.Telegram.Token, BaseURL: definition.Telegram.BaseURL, Proxy: definition.Telegram.Proxy, AllowFrom: definition.Telegram.AllowFrom, PlaceholderText: definition.Telegram.Placeholder.Text, MediaStore: sharedMediaStore, HTTPClient: telegramHTTPClient, RatePerSecond: definition.RatePerSecond, Burst: definition.Burst, QueueSize: definition.QueueSize, MaxRetries: definition.MaxRetries})
 		case "webhook":

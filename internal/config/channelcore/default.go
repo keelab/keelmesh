@@ -16,6 +16,7 @@ func Default() Config {
 		AppName:         "xxx",
 		Environment:     "development",
 		GRPCAddr:        "0.0.0.0:9010",
+		GateCoreAddress: "",
 		GRPCOpsAddr:     "127.0.0.1:9011",
 		HTTPAddr:        "0.0.0.0:9012",
 		ShutdownTimeout: 10 * time.Second,

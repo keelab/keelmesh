@@ -21,11 +21,11 @@ func newServiceProfile(
 	ctx context.Context,
 	loaded channelcore.Loaded,
 	resources *dependencies.Resources,
-	loggingDependencies logging.Dependencies,
-	auditLogger *audit.Logger,
+	logDeps *logging.Dependencies,
+	audit *audit.Logger,
 	channels domain.ChannelDomain,
 ) (*di.Graph, *service.Profile, error) {
-	graph, handlers, err := newServiceHandlers(ctx, loaded.Runtime, resources, channels, loggingDependencies, auditLogger)
+	graph, handlers, err := newServiceHandlers(ctx, loaded.Runtime, resources, channels, logDeps, audit)
 	if err != nil {
 		return nil, nil, fmt.Errorf("build service dependency graph: %w", err)
 	}
@@ -34,7 +34,7 @@ func newServiceProfile(
 		_ = graph.Close(context.WithoutCancel(ctx))
 		return nil, nil, fmt.Errorf("build protocol policies: %w", err)
 	}
-	profile, err := service.NewProfile("public-api", service.NewGroup("channel").
+	profile, err := service.NewProfile("internal-api", service.NewGroup("channel").
 		RequireGRPC(service.CapabilityRequestID).
 		UseGRPCPolicies(service.NewPolicy(policies.requestID, service.CapabilityRequestID)).
 		Bind(channelv1.BindChannelService(handlers.Channel)))

@@ -27,6 +27,7 @@ func (s *Service) SendMedia(ctx context.Context, request *channelv1.SendMediaReq
 		Metadata:       request.GetMetadata(),
 		IdempotencyKey: request.GetIdempotencyKey()})
 	if err != nil {
+		s.logError(ctx, "send_media", err, "channel_id", request.GetChannelId(), "target_id", request.GetTargetId())
 		return nil, err
 	}
 

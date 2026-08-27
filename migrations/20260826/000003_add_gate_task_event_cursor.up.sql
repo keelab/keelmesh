@@ -1,0 +1,3 @@
+ALTER TABLE keelmesh_gate_tasks
+    ADD COLUMN IF NOT EXISTS last_sequence BIGINT NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS last_event_id TEXT NOT NULL DEFAULT '';

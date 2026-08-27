@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "v3",
+  "generatorProtocol": "v1",
+  "source": "loop/v1/loop.proto",
+  "package": "loop.v1",
+  "goImportPath": "github.com/keelab/keelmesh/gen/loop/v1",
+  "goPackage": "loopv1",
+  "services": [
+    {
+      "name": "loop.v1.LoopService",
+      "goName": "LoopService",
+      "methods": [
+        {
+          "name": "StartRun",
+          "operation": "/loop.v1.LoopService/StartRun",
+          "kind": "unary",
+          "input": "loop.v1.StartRunRequest",
+          "output": "loop.v1.RunResponse"
+        },
+        {
+          "name": "GetRun",
+          "operation": "/loop.v1.LoopService/GetRun",
+          "kind": "unary",
+          "input": "loop.v1.GetRunRequest",
+          "output": "loop.v1.RunResponse"
+        },
+        {
+          "name": "AdvanceStep",
+          "operation": "/loop.v1.LoopService/AdvanceStep",
+          "kind": "unary",
+          "input": "loop.v1.AdvanceStepRequest",
+          "output": "loop.v1.RunResponse"
+        },
+        {
+          "name": "CancelRun",
+          "operation": "/loop.v1.LoopService/CancelRun",
+          "kind": "unary",
+          "input": "loop.v1.CancelRunRequest",
+          "output": "loop.v1.RunResponse"
+        }
+      ]
+    }
+  ],
+  "listeners": [
+    {
+      "transport": "grpc",
+      "service": "loop.v1.LoopService"
+    }
+  ]
+}

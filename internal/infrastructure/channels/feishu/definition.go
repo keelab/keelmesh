@@ -5,5 +5,5 @@ import (
 )
 
 func (c *Channel) Definition() domain.DefinitionEntity {
-	return domain.DefinitionEntity{ID: c.config.ID, Kind: "feishu", Enabled: c.config.Enabled, Capabilities: []string{"messages", "inbound_stream", "threads"}, RatePerSecond: c.config.RatePerSecond, Burst: c.config.Burst, QueueSize: c.config.QueueSize, MaxRetries: c.config.MaxRetries}
+	return domain.DefinitionEntity{ID: c.config.ID, Kind: "feishu", Enabled: c.config.Enabled, Capabilities: []string{"messages", "notifications", "inbound_stream", "media", "edit", "typing", "placeholder", "reactions", "streaming", "threads"}, GroupTrigger: c.config.GroupTrigger, RatePerSecond: c.config.RatePerSecond, Burst: c.config.Burst, QueueSize: c.config.QueueSize, MaxRetries: c.config.MaxRetries}
 }

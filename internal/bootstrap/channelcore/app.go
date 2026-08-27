@@ -63,7 +63,7 @@ func buildApp(ctx context.Context, runtime *Runtime, apiServer appServer, opsAdd
 	observed, observeErr := service.ObserveListener(
 		apiServer,
 		surface,
-		runtime.Telemetry.Logger(),
+		runtime.Telemetry.Logger().Slog(),
 	)
 	if observeErr != nil {
 		_ = runtime.Close(context.WithoutCancel(ctx))

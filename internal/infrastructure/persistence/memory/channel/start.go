@@ -23,8 +23,14 @@ func (r *Repository) Start(ctx context.Context) error {
 	runCtx, cancel := context.WithCancel(ctx)
 	r.cancel = cancel
 	r.janitorDone = make(chan struct{})
+	forwarder := r.inboundForwarder
+	forwardQueue := r.forwardQueue
 	r.mu.Unlock()
 	go r.runJanitor(runCtx)
+	if forwarder != nil && forwardQueue != nil {
+		r.forwardWG.Add(1)
+		go r.runInboundForwarder(runCtx, forwardQueue, forwarder)
+	}
 	started := make([]domain.Channel, 0)
 	for _, channel := range r.registry.All() {
 		if !channel.Definition().Enabled {
@@ -59,6 +65,20 @@ func (r *Repository) Start(ctx context.Context) error {
 		go r.runWorker(runCtx, worker)
 	}
 	return nil
+}
+
+func (r *Repository) runInboundForwarder(ctx context.Context, queue <-chan domain.Inbound, forward func(context.Context, domain.Inbound) error) {
+	defer r.forwardWG.Done()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case message := <-queue:
+			if err := forward(ctx, message); err != nil {
+				r.forwardFailures.Add(1)
+			}
+		}
+	}
 }
 
 func (r *Repository) runJanitor(ctx context.Context) {
@@ -96,6 +116,16 @@ func (r *Repository) runJanitor(ctx context.Context) {
 					}
 				}
 			}
+			for id, entry := range r.lifecycle {
+				if now.Sub(entry.createdAt) > 30*time.Minute {
+					delete(r.lifecycle, id)
+				}
+			}
+			for id, entry := range r.idempotency {
+				if now.Sub(entry.createdAt) > 30*time.Minute {
+					delete(r.idempotency, id)
+				}
+			}
 			r.mu.Unlock()
 			for _, stop := range stops {
 				stop()
@@ -111,9 +141,19 @@ func (r *Repository) runWorker(ctx context.Context, worker *channelWorker) {
 	defer worker.wg.Done()
 	for {
 		select {
-		case message := <-worker.text:
-			r.sendWithRetry(ctx, worker, message)
-		case message := <-worker.media:
+		case message, ok := <-worker.text:
+			if !ok {
+				return
+			}
+			for _, chunk := range splitOutbound(message, maxMessageLength(worker.channel.Definition().Kind)) {
+				if err := r.sendWithRetry(ctx, worker, chunk); err != nil {
+					break
+				}
+			}
+		case message, ok := <-worker.media:
+			if !ok {
+				return
+			}
 			if channel, ok := worker.channel.(domain.MediaChannel); ok {
 				r.sendMediaWithRetry(ctx, worker, channel, message)
 			}
@@ -126,34 +166,34 @@ func (r *Repository) runWorker(ctx context.Context, worker *channelWorker) {
 		}
 	}
 }
-func (r *Repository) sendWithRetry(ctx context.Context, worker *channelWorker, message domain.Outbound) {
+func (r *Repository) sendWithRetry(ctx context.Context, worker *channelWorker, message domain.Outbound) error {
 	r.recordDelivery(message.ID, message.ChannelID, domain.DeliverySending, clock.UTC(), "")
 	maxRetries := worker.channel.Definition().MaxRetries
 	if maxRetries <= 0 {
 		maxRetries = 4
 	}
-	for attempt := 0; attempt < maxRetries; attempt++ {
+	for attempt := 0; attempt <= maxRetries; attempt++ {
 		if err := worker.limiter.wait(ctx); err != nil {
 			r.recordDelivery(message.ID, message.ChannelID, domain.DeliveryCancelled, clock.UTC(), err.Error())
-			return
+			return err
 		}
 		if receipt, err := worker.channel.Send(ctx, message); err == nil {
 			id := message.ID
 			if receipt.MessageID != "" {
 				id = receipt.MessageID
 			}
-			r.recordDelivery(message.ID, message.ChannelID, domain.DeliveryAcknowledged, clock.UTC(), "")
-			_ = id
-			return
-		} else if attempt == maxRetries-1 {
+			r.recordDeliveryWithMessageID(message.ID, message.ChannelID, id, domain.DeliveryAcknowledged, clock.UTC(), "")
+			return nil
+		} else if !retryable(err) || attempt == maxRetries {
 			r.recordDelivery(message.ID, message.ChannelID, domain.DeliveryFailed, clock.UTC(), err.Error())
-			return
+			return err
 		}
 		if err := waitBackoff(ctx, time.Duration(1<<attempt)*250*time.Millisecond); err != nil {
 			r.recordDelivery(message.ID, message.ChannelID, domain.DeliveryCancelled, clock.UTC(), err.Error())
-			return
+			return err
 		}
 	}
+	return nil
 }
 func (r *Repository) sendMediaWithRetry(ctx context.Context, worker *channelWorker, channel domain.MediaChannel, message domain.OutboundMedia) {
 	r.recordDelivery(message.ID, message.ChannelID, domain.DeliverySending, clock.UTC(), "")
@@ -161,15 +201,19 @@ func (r *Repository) sendMediaWithRetry(ctx context.Context, worker *channelWork
 	if maxRetries <= 0 {
 		maxRetries = 4
 	}
-	for attempt := 0; attempt < maxRetries; attempt++ {
+	for attempt := 0; attempt <= maxRetries; attempt++ {
 		if err := worker.limiter.wait(ctx); err != nil {
 			r.recordDelivery(message.ID, message.ChannelID, domain.DeliveryCancelled, clock.UTC(), err.Error())
 			return
 		}
-		if _, err := channel.SendMedia(ctx, message); err == nil {
-			r.recordDelivery(message.ID, message.ChannelID, domain.DeliveryAcknowledged, clock.UTC(), "")
+		if receipt, err := channel.SendMedia(ctx, message); err == nil {
+			id := message.ID
+			if receipt.MessageID != "" {
+				id = receipt.MessageID
+			}
+			r.recordDeliveryWithMessageID(message.ID, message.ChannelID, id, domain.DeliveryAcknowledged, clock.UTC(), "")
 			return
-		} else if attempt == maxRetries-1 {
+		} else if !retryable(err) || attempt == maxRetries {
 			r.recordDelivery(message.ID, message.ChannelID, domain.DeliveryFailed, clock.UTC(), err.Error())
 			return
 		}
@@ -205,10 +249,14 @@ func (l *rateLimiter) wait(ctx context.Context) error {
 	}
 }
 func (r *Repository) recordDelivery(id, channelID string, state domain.DeliveryState, updated time.Time, messageErr string) {
+	r.recordDeliveryWithMessageID(id, channelID, id, state, updated, messageErr)
+}
+
+func (r *Repository) recordDeliveryWithMessageID(id, channelID, messageID string, state domain.DeliveryState, updated time.Time, messageErr string) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	status := r.deliveries[id]
-	status.MessageID, status.ChannelID, status.State, status.UpdatedAt = id, channelID, state, updated
+	status.MessageID, status.ChannelID, status.State, status.UpdatedAt = messageID, channelID, state, updated
 	if status.AcceptedAt.IsZero() {
 		status.AcceptedAt = updated
 	}
@@ -220,7 +268,7 @@ func (r *Repository) drainWorker(ctx context.Context, worker *channelWorker) {
 	for {
 		select {
 		case message := <-worker.text:
-			r.sendWithRetry(ctx, worker, message)
+			_ = r.sendWithRetry(ctx, worker, message)
 		case message := <-worker.media:
 			if channel, ok := worker.channel.(domain.MediaChannel); ok {
 				r.sendMediaWithRetry(ctx, worker, channel, message)
@@ -257,4 +305,49 @@ func minFloat(a, b float64) float64 {
 		return a
 	}
 	return b
+}
+
+func maxMessageLength(kind string) int {
+	switch kind {
+	case "telegram":
+		return 4000
+	case "dingtalk":
+		return 20000
+	case "wecom", "wecom_app", "wecom_aibot":
+		return 2048
+	default:
+		return 0
+	}
+}
+
+func splitOutbound(message domain.Outbound, maxLength int) []domain.Outbound {
+	if maxLength <= 0 || len([]rune(message.Content)) <= maxLength {
+		return []domain.Outbound{message}
+	}
+
+	runes := []rune(message.Content)
+	chunks := make([]domain.Outbound, 0, (len(runes)+maxLength-1)/maxLength)
+	for len(runes) > 0 {
+		end := min(len(runes), maxLength)
+		if end < len(runes) {
+			for index := end; index > 0; index-- {
+				if runes[index-1] != '\n' && runes[index-1] != ' ' && runes[index-1] != '\t' {
+					continue
+				}
+				if end-index < maxLength/4 {
+					continue
+				}
+				end = index
+				break
+			}
+		}
+		chunk := message
+		chunk.Content = string(runes[:end])
+		chunks = append(chunks, chunk)
+		runes = runes[end:]
+		for len(runes) > 0 && (runes[0] == ' ' || runes[0] == '\t' || runes[0] == '\n' || runes[0] == '\r') {
+			runes = runes[1:]
+		}
+	}
+	return chunks
 }

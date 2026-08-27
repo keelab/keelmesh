@@ -1,0 +1,78 @@
+{
+  "schemaVersion": "v3",
+  "generatorProtocol": "v1",
+  "source": "gate/v1/channel_gate.proto",
+  "package": "gate.v1",
+  "goImportPath": "github.com/keelab/keelmesh/gen/gate/v1",
+  "goPackage": "gatev1",
+  "services": [
+    {
+      "name": "gate.v1.ChannelGateService",
+      "goName": "ChannelGateService",
+      "methods": [
+        {
+          "name": "IngestInbound",
+          "operation": "/gate.v1.ChannelGateService/IngestInbound",
+          "kind": "unary",
+          "input": "gate.v1.IngestInboundRequest",
+          "output": "gate.v1.DispatchResponse"
+        },
+        {
+          "name": "AuthorizeOutbound",
+          "operation": "/gate.v1.ChannelGateService/AuthorizeOutbound",
+          "kind": "unary",
+          "input": "gate.v1.AuthorizeOutboundRequest",
+          "output": "gate.v1.AuthorizeOutboundResponse"
+        },
+        {
+          "name": "DispatchTask",
+          "operation": "/gate.v1.ChannelGateService/DispatchTask",
+          "kind": "unary",
+          "input": "gate.v1.DispatchTaskRequest",
+          "output": "gate.v1.DispatchResponse"
+        },
+        {
+          "name": "GetTask",
+          "operation": "/gate.v1.ChannelGateService/GetTask",
+          "kind": "unary",
+          "input": "gate.v1.GetTaskRequest",
+          "output": "gate.v1.TaskStatusResponse"
+        },
+        {
+          "name": "ResumeTask",
+          "operation": "/gate.v1.ChannelGateService/ResumeTask",
+          "kind": "unary",
+          "input": "gate.v1.ResumeTaskRequest",
+          "output": "gate.v1.DispatchResponse"
+        },
+        {
+          "name": "ApproveTask",
+          "operation": "/gate.v1.ChannelGateService/ApproveTask",
+          "kind": "unary",
+          "input": "gate.v1.ApproveTaskRequest",
+          "output": "gate.v1.DispatchResponse"
+        },
+        {
+          "name": "CancelTask",
+          "operation": "/gate.v1.ChannelGateService/CancelTask",
+          "kind": "unary",
+          "input": "gate.v1.CancelTaskRequest",
+          "output": "gate.v1.DispatchResponse"
+        },
+        {
+          "name": "ProjectTaskEvent",
+          "operation": "/gate.v1.ChannelGateService/ProjectTaskEvent",
+          "kind": "unary",
+          "input": "gate.v1.ProjectTaskEventRequest",
+          "output": "gate.v1.ProjectTaskEventResponse"
+        }
+      ]
+    }
+  ],
+  "listeners": [
+    {
+      "transport": "grpc",
+      "service": "gate.v1.ChannelGateService"
+    }
+  ]
+}

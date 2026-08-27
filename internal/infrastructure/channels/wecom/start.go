@@ -112,7 +112,7 @@ func (c *Channel) serve(w stdhttp.ResponseWriter, r *stdhttp.Request) {
 			stdhttp.Error(w, "invalid json", 400)
 			return
 		}
-		in = domain.Inbound{ChannelID: c.config.ID, MessageID: msg.MsgID, ChatID: msg.ChatID, SenderID: msg.From.UserID, Content: msg.Text.Content, ReceivedAt: time.Now().UTC()}
+		in = domain.Inbound{ChannelID: c.config.ID, MessageID: msg.MsgID, ChatID: msg.ChatID, SenderID: msg.From.UserID, Content: msg.Text.Content, Metadata: map[string]string{"scope": "direct"}, ReceivedAt: time.Now().UTC()}
 		responseURL = msg.ResponseURL
 	} else {
 		var msg wecomXML
@@ -127,9 +127,9 @@ func (c *Channel) serve(w stdhttp.ResponseWriter, r *stdhttp.Request) {
 				stdhttp.Error(w, "invalid message", 400)
 				return
 			}
-			in = domain.Inbound{ChannelID: c.config.ID, MessageID: obj.ID, ChatID: obj.Chat, SenderID: obj.From, Content: obj.Content, ReceivedAt: time.Now().UTC()}
+			in = domain.Inbound{ChannelID: c.config.ID, MessageID: obj.ID, ChatID: obj.Chat, SenderID: obj.From, Content: obj.Content, Metadata: map[string]string{"scope": "direct"}, ReceivedAt: time.Now().UTC()}
 		} else {
-			in = domain.Inbound{ChannelID: c.config.ID, MessageID: msg.MsgID, ChatID: msg.FromUserName, SenderID: msg.FromUserName, Content: msg.Content, Media: mediaForXML(msg), ReceivedAt: time.Now().UTC()}
+			in = domain.Inbound{ChannelID: c.config.ID, MessageID: msg.MsgID, ChatID: msg.FromUserName, SenderID: msg.FromUserName, Content: msg.Content, Media: mediaForXML(msg), Metadata: map[string]string{"scope": "direct"}, ReceivedAt: time.Now().UTC()}
 		}
 	}
 	if in.MessageID != "" {

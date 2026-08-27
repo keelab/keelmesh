@@ -9,6 +9,7 @@ import (
 // ReleaseMedia releases a media.
 func (s *Service) ReleaseMedia(ctx context.Context, request *channelv1.ReleaseMediaRequest) (*channelv1.ReleaseMediaResponse, error) {
 	if err := s.runtime.ReleaseMedia(ctx, request.GetRef()); err != nil {
+		s.logError(ctx, "release_media", err, "ref", request.GetRef())
 		return nil, err
 	}
 

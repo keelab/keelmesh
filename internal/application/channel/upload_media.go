@@ -11,6 +11,7 @@ import (
 func (s *Service) UploadMedia(ctx context.Context, request *channelv1.UploadMediaRequest) (*channelv1.UploadMediaResponse, error) {
 	part, err := s.runtime.StoreMedia(ctx, request.GetFilename(), request.GetContentType(), bytes.NewReader(request.GetContent()))
 	if err != nil {
+		s.logError(ctx, "upload_media", err, "filename", request.GetFilename(), "content_type", request.GetContentType())
 		return nil, err
 	}
 

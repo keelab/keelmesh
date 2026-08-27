@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "v3",
+  "generatorProtocol": "v1",
+  "source": "agent/v1/runtime.proto",
+  "package": "agent.v1",
+  "goImportPath": "github.com/keelab/keelmesh/gen/agent/v1",
+  "goPackage": "agentv1",
+  "services": [
+    {
+      "name": "agent.v1.AgentRuntimeService",
+      "goName": "AgentRuntimeService",
+      "methods": [
+        {
+          "name": "ExecuteTask",
+          "operation": "/agent.v1.AgentRuntimeService/ExecuteTask",
+          "kind": "unary",
+          "input": "agent.v1.ExecuteTaskRequest",
+          "output": "agent.v1.ExecuteTaskResponse"
+        },
+        {
+          "name": "SubscribeTaskEvents",
+          "operation": "/agent.v1.AgentRuntimeService/SubscribeTaskEvents",
+          "kind": "server-stream",
+          "input": "agent.v1.SubscribeTaskEventsRequest",
+          "output": "agent.v1.TaskEvent"
+        }
+      ]
+    }
+  ],
+  "listeners": [
+    {
+      "transport": "grpc",
+      "service": "agent.v1.AgentRuntimeService"
+    }
+  ]
+}

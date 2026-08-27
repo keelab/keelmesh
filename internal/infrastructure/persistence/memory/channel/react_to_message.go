@@ -15,7 +15,7 @@ func (r *Repository) ReactToMessage(ctx context.Context, channelID, targetID, me
 	}
 	controller, ok := channel.(domain.ReactionController)
 	if !ok {
-		return "", fmt.Errorf("channelcore: channel %q does not support reactions", channelID)
+		return "", fmt.Errorf("%w: channel %q does not support reactions", ErrUnsupported, channelID)
 	}
 	complete, expire, err := controller.ReactToMessage(ctx, targetID, messageID, reaction)
 	if err != nil {

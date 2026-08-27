@@ -17,6 +17,7 @@ import (
 )
 
 var _ domain.Channel = (*Channel)(nil)
+var _ domain.MediaChannel = (*Channel)(nil)
 
 type Config struct {
 	ID              string
@@ -25,6 +26,7 @@ type Config struct {
 	BaseURL         string
 	Proxy           string
 	AllowFrom       []string
+	GroupTrigger    domain.GroupTriggerPolicy
 	PlaceholderText string
 	MediaStore      domain.MediaDomain
 	HTTPClient      *http.Client

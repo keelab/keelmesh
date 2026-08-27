@@ -56,7 +56,7 @@ func (c *Channel) handleGroup(_ *dto.WSPayload, data *dto.WSGroupATMessageData) 
 	if data == nil || data.Author == nil {
 		return nil
 	}
-	return c.publish(data.ID, data.Author.ID, data.GroupID, data.Content, map[string]string{"scope": "group", "group_id": data.GroupID})
+	return c.publish(data.ID, data.Author.ID, data.GroupID, data.Content, map[string]string{"scope": "group", "group_id": data.GroupID, "mentioned": "true"})
 }
 
 func (c *Channel) publish(id, sender, chat, content string, metadata map[string]string) error {

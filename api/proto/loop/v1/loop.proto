@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package loop.v1;
+
+option go_package = "github.com/keelab/keelmesh/gen/loop/v1;loopv1";
+
+service LoopService {
+  rpc StartRun(StartRunRequest) returns (RunResponse);
+  rpc GetRun(GetRunRequest) returns (RunResponse);
+  rpc AdvanceStep(AdvanceStepRequest) returns (RunResponse);
+  rpc CancelRun(CancelRunRequest) returns (RunResponse);
+}
+
+message StartRunRequest {
+  string run_id = 1;
+  string task_id = 2;
+  string channel_id = 3;
+  string target_id = 4;
+  string input = 5;
+  map<string, string> metadata = 6;
+  repeated StepDefinition steps = 7;
+}
+
+message GetRunRequest { string run_id = 1; }
+
+message AdvanceStepRequest {
+  string run_id = 1;
+  string step_id = 2;
+  string state = 3;
+  string output = 4;
+  string error = 5;
+  int32 iteration = 6;
+}
+
+message CancelRunRequest {
+  string run_id = 1;
+  string reason = 2;
+}
+
+message StepDefinition {
+  string id = 1;
+  string kind = 2;
+  string name = 3;
+  int32 max_iterations = 4;
+}
+
+message RunResponse {
+  string run_id = 1;
+  string task_id = 2;
+  string channel_id = 3;
+  string target_id = 4;
+  string state = 5;
+  string current_step_id = 6;
+  int32 iteration = 7;
+  string output = 8;
+  string error = 9;
+  repeated StepStatus steps = 10;
+}
+
+message StepStatus {
+  string id = 1;
+  string kind = 2;
+  string name = 3;
+  string state = 4;
+  int32 iteration = 5;
+  string output = 6;
+  string error = 7;
+}

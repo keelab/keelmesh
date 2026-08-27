@@ -21,6 +21,8 @@ type ChannelServiceKeelithServer interface {
 	GetChannel(context.Context, *GetChannelRequest) (*GetChannelResponse, error)
 	ProbeChannel(context.Context, *ProbeChannelRequest) (*ProbeChannelResponse, error)
 	SendMessage(context.Context, *SendMessageRequest) (*SendMessageResponse, error)
+	SendNotification(context.Context, *SendNotificationRequest) (*SendNotificationResponse, error)
+	PrepareInbound(context.Context, *PrepareInboundRequest) (*PrepareInboundResponse, error)
 	SendMedia(context.Context, *SendMediaRequest) (*SendMediaResponse, error)
 	GetDeliveryStatus(context.Context, *GetDeliveryStatusRequest) (*GetDeliveryStatusResponse, error)
 	EditMessage(context.Context, *EditMessageRequest) (*EditMessageResponse, error)
@@ -36,6 +38,7 @@ type ChannelServiceKeelithServer interface {
 	UploadMedia(context.Context, *UploadMediaRequest) (*UploadMediaResponse, error)
 	DownloadMedia(context.Context, *DownloadMediaRequest) (*DownloadMediaResponse, error)
 	ReleaseMedia(context.Context, *ReleaseMediaRequest) (*ReleaseMediaResponse, error)
+	RegisterCommands(context.Context, *RegisterCommandsRequest) (*RegisterCommandsResponse, error)
 	SubscribeInbound(*SubscribeInboundRequest, ChannelService_SubscribeInboundKeelithServer) error
 }
 
@@ -68,6 +71,14 @@ func (*UnimplementedChannelServiceKeelithServer) ProbeChannel(context.Context, *
 
 func (*UnimplementedChannelServiceKeelithServer) SendMessage(context.Context, *SendMessageRequest) (*SendMessageResponse, error) {
 	return nil, errors.New(501, "UNIMPLEMENTED", "channel.v1.ChannelService.SendMessage is not implemented")
+}
+
+func (*UnimplementedChannelServiceKeelithServer) SendNotification(context.Context, *SendNotificationRequest) (*SendNotificationResponse, error) {
+	return nil, errors.New(501, "UNIMPLEMENTED", "channel.v1.ChannelService.SendNotification is not implemented")
+}
+
+func (*UnimplementedChannelServiceKeelithServer) PrepareInbound(context.Context, *PrepareInboundRequest) (*PrepareInboundResponse, error) {
+	return nil, errors.New(501, "UNIMPLEMENTED", "channel.v1.ChannelService.PrepareInbound is not implemented")
 }
 
 func (*UnimplementedChannelServiceKeelithServer) SendMedia(context.Context, *SendMediaRequest) (*SendMediaResponse, error) {
@@ -130,6 +141,10 @@ func (*UnimplementedChannelServiceKeelithServer) ReleaseMedia(context.Context, *
 	return nil, errors.New(501, "UNIMPLEMENTED", "channel.v1.ChannelService.ReleaseMedia is not implemented")
 }
 
+func (*UnimplementedChannelServiceKeelithServer) RegisterCommands(context.Context, *RegisterCommandsRequest) (*RegisterCommandsResponse, error) {
+	return nil, errors.New(501, "UNIMPLEMENTED", "channel.v1.ChannelService.RegisterCommands is not implemented")
+}
+
 func (*UnimplementedChannelServiceKeelithServer) SubscribeInbound(*SubscribeInboundRequest, ChannelService_SubscribeInboundKeelithServer) error {
 	return errors.New(501, "UNIMPLEMENTED", "channel.v1.ChannelService.SubscribeInbound is not implemented")
 }
@@ -142,6 +157,8 @@ type ChannelServiceKeelithClient interface {
 	GetChannel(context.Context, *GetChannelRequest, ...grpc.CallOption) (*GetChannelResponse, error)
 	ProbeChannel(context.Context, *ProbeChannelRequest, ...grpc.CallOption) (*ProbeChannelResponse, error)
 	SendMessage(context.Context, *SendMessageRequest, ...grpc.CallOption) (*SendMessageResponse, error)
+	SendNotification(context.Context, *SendNotificationRequest, ...grpc.CallOption) (*SendNotificationResponse, error)
+	PrepareInbound(context.Context, *PrepareInboundRequest, ...grpc.CallOption) (*PrepareInboundResponse, error)
 	SendMedia(context.Context, *SendMediaRequest, ...grpc.CallOption) (*SendMediaResponse, error)
 	GetDeliveryStatus(context.Context, *GetDeliveryStatusRequest, ...grpc.CallOption) (*GetDeliveryStatusResponse, error)
 	EditMessage(context.Context, *EditMessageRequest, ...grpc.CallOption) (*EditMessageResponse, error)
@@ -157,6 +174,7 @@ type ChannelServiceKeelithClient interface {
 	UploadMedia(context.Context, *UploadMediaRequest, ...grpc.CallOption) (*UploadMediaResponse, error)
 	DownloadMedia(context.Context, *DownloadMediaRequest, ...grpc.CallOption) (*DownloadMediaResponse, error)
 	ReleaseMedia(context.Context, *ReleaseMediaRequest, ...grpc.CallOption) (*ReleaseMediaResponse, error)
+	RegisterCommands(context.Context, *RegisterCommandsRequest, ...grpc.CallOption) (*RegisterCommandsResponse, error)
 	SubscribeInbound(context.Context, *SubscribeInboundRequest, ...grpc.CallOption) (ChannelService_SubscribeInboundKeelithClient, error)
 }
 
@@ -195,6 +213,22 @@ func (client *channelServiceGRPCClient) ProbeChannel(ctx context.Context, input 
 func (client *channelServiceGRPCClient) SendMessage(ctx context.Context, input *SendMessageRequest, options ...grpc.CallOption) (*SendMessageResponse, error) {
 	output := new(SendMessageResponse)
 	if err := client.connection.Invoke(ctx, "/channel.v1.ChannelService/SendMessage", input, output, options...); err != nil {
+		return nil, err
+	}
+	return output, nil
+}
+
+func (client *channelServiceGRPCClient) SendNotification(ctx context.Context, input *SendNotificationRequest, options ...grpc.CallOption) (*SendNotificationResponse, error) {
+	output := new(SendNotificationResponse)
+	if err := client.connection.Invoke(ctx, "/channel.v1.ChannelService/SendNotification", input, output, options...); err != nil {
+		return nil, err
+	}
+	return output, nil
+}
+
+func (client *channelServiceGRPCClient) PrepareInbound(ctx context.Context, input *PrepareInboundRequest, options ...grpc.CallOption) (*PrepareInboundResponse, error) {
+	output := new(PrepareInboundResponse)
+	if err := client.connection.Invoke(ctx, "/channel.v1.ChannelService/PrepareInbound", input, output, options...); err != nil {
 		return nil, err
 	}
 	return output, nil
@@ -320,6 +354,14 @@ func (client *channelServiceGRPCClient) ReleaseMedia(ctx context.Context, input 
 	return output, nil
 }
 
+func (client *channelServiceGRPCClient) RegisterCommands(ctx context.Context, input *RegisterCommandsRequest, options ...grpc.CallOption) (*RegisterCommandsResponse, error) {
+	output := new(RegisterCommandsResponse)
+	if err := client.connection.Invoke(ctx, "/channel.v1.ChannelService/RegisterCommands", input, output, options...); err != nil {
+		return nil, err
+	}
+	return output, nil
+}
+
 func (client *channelServiceGRPCClient) SubscribeInbound(ctx context.Context,
 	input *SubscribeInboundRequest,
 	options ...grpc.CallOption) (ChannelService_SubscribeInboundKeelithClient, error) {
@@ -439,6 +481,36 @@ func channelServiceSendMessageGRPCHandler(service any, ctx context.Context, deco
 	info := &grpc.UnaryServerInfo{Server: service, FullMethod: "/channel.v1.ChannelService/SendMessage"}
 	handler := func(ctx context.Context, request any) (any, error) {
 		return service.(ChannelServiceKeelithServer).SendMessage(ctx, request.(*SendMessageRequest))
+	}
+	return interceptor(ctx, input, info, handler)
+}
+
+func channelServiceSendNotificationGRPCHandler(service any, ctx context.Context, decode func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+	input := new(SendNotificationRequest)
+	if err := decode(input); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return service.(ChannelServiceKeelithServer).SendNotification(ctx, input)
+	}
+	info := &grpc.UnaryServerInfo{Server: service, FullMethod: "/channel.v1.ChannelService/SendNotification"}
+	handler := func(ctx context.Context, request any) (any, error) {
+		return service.(ChannelServiceKeelithServer).SendNotification(ctx, request.(*SendNotificationRequest))
+	}
+	return interceptor(ctx, input, info, handler)
+}
+
+func channelServicePrepareInboundGRPCHandler(service any, ctx context.Context, decode func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+	input := new(PrepareInboundRequest)
+	if err := decode(input); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return service.(ChannelServiceKeelithServer).PrepareInbound(ctx, input)
+	}
+	info := &grpc.UnaryServerInfo{Server: service, FullMethod: "/channel.v1.ChannelService/PrepareInbound"}
+	handler := func(ctx context.Context, request any) (any, error) {
+		return service.(ChannelServiceKeelithServer).PrepareInbound(ctx, request.(*PrepareInboundRequest))
 	}
 	return interceptor(ctx, input, info, handler)
 }
@@ -668,6 +740,21 @@ func channelServiceReleaseMediaGRPCHandler(service any, ctx context.Context, dec
 	return interceptor(ctx, input, info, handler)
 }
 
+func channelServiceRegisterCommandsGRPCHandler(service any, ctx context.Context, decode func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
+	input := new(RegisterCommandsRequest)
+	if err := decode(input); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return service.(ChannelServiceKeelithServer).RegisterCommands(ctx, input)
+	}
+	info := &grpc.UnaryServerInfo{Server: service, FullMethod: "/channel.v1.ChannelService/RegisterCommands"}
+	handler := func(ctx context.Context, request any) (any, error) {
+		return service.(ChannelServiceKeelithServer).RegisterCommands(ctx, request.(*RegisterCommandsRequest))
+	}
+	return interceptor(ctx, input, info, handler)
+}
+
 func channelServiceSubscribeInboundGRPCStreamHandler(service any, stream grpc.ServerStream) error {
 	input := new(SubscribeInboundRequest)
 	if err := stream.RecvMsg(input); err != nil {
@@ -695,6 +782,14 @@ var ChannelServiceKeelithGRPCServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SendMessage",
 			Handler:    channelServiceSendMessageGRPCHandler,
+		},
+		{
+			MethodName: "SendNotification",
+			Handler:    channelServiceSendNotificationGRPCHandler,
+		},
+		{
+			MethodName: "PrepareInbound",
+			Handler:    channelServicePrepareInboundGRPCHandler,
 		},
 		{
 			MethodName: "SendMedia",
@@ -755,6 +850,10 @@ var ChannelServiceKeelithGRPCServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReleaseMedia",
 			Handler:    channelServiceReleaseMediaGRPCHandler,
+		},
+		{
+			MethodName: "RegisterCommands",
+			Handler:    channelServiceRegisterCommandsGRPCHandler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

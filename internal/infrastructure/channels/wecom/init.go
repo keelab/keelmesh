@@ -31,6 +31,7 @@ type Config struct {
 	Listen         string
 	Path           string
 	AllowFrom      []string
+	GroupTrigger   domain.GroupTriggerPolicy
 	RatePerSecond  float64
 	Burst          int
 	QueueSize      int

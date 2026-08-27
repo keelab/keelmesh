@@ -60,7 +60,17 @@ func (c *Channel) receive(ctx context.Context, data *chatbot.BotCallbackDataMode
 	sink := c.sink
 	c.mu.Unlock()
 	if sink != nil {
-		sink(domain.Inbound{ChannelID: c.config.ID, ChatID: chatID, SenderID: sender, SenderName: data.SenderNick, Content: strings.TrimSpace(content), Metadata: map[string]string{"conversation_id": data.ConversationId, "conversation_type": data.ConversationType, "session_webhook": data.SessionWebhook}, ReceivedAt: time.Now().UTC()})
+		metadata := map[string]string{
+			"conversation_id":   data.ConversationId,
+			"conversation_type": data.ConversationType,
+			"session_webhook":   data.SessionWebhook,
+			"scope":             "direct",
+		}
+		if data.ConversationType != "1" {
+			metadata["scope"] = "group"
+			metadata["mentioned"] = "true"
+		}
+		sink(domain.Inbound{ChannelID: c.config.ID, ChatID: chatID, SenderID: sender, SenderName: data.SenderNick, Content: strings.TrimSpace(content), Metadata: metadata, ReceivedAt: time.Now().UTC()})
 	}
 	return nil, nil
 }

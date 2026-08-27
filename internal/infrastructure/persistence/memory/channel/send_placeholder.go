@@ -14,7 +14,7 @@ func (r *Repository) SendPlaceholder(ctx context.Context, channelID, targetID, r
 	}
 	controller, ok := channel.(domain.PlaceholderController)
 	if !ok {
-		return "", fmt.Errorf("channelcore: channel %q does not support placeholders", channelID)
+		return "", fmt.Errorf("%w: channel %q does not support placeholders", ErrUnsupported, channelID)
 	}
 	return controller.SendPlaceholder(ctx, targetID, replyTo, content)
 }

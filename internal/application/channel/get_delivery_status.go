@@ -11,7 +11,9 @@ import (
 func (s *Service) GetDeliveryStatus(_ context.Context, request *channelv1.GetDeliveryStatusRequest) (*channelv1.GetDeliveryStatusResponse, error) {
 	status, ok := s.runtime.Delivery(request.GetMessageId())
 	if !ok {
-		return nil, fmt.Errorf("channelcore: delivery %q not found", request.GetMessageId())
+		err := fmt.Errorf("channelcore: delivery %q not found", request.GetMessageId())
+		s.logError(context.Background(), "get_delivery_status", err, "message_id", request.GetMessageId())
+		return nil, err
 	}
 
 	return &channelv1.GetDeliveryStatusResponse{

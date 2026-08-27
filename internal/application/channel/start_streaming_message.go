@@ -10,6 +10,7 @@ import (
 func (s *Service) StartStreamingMessage(ctx context.Context, request *channelv1.StartStreamingMessageRequest) (*channelv1.StartStreamingMessageResponse, error) {
 	id, err := s.runtime.StartStreamingMessage(ctx, request.GetChannelId(), request.GetTargetId(), request.GetReplyToMessageId(), request.GetContent())
 	if err != nil {
+		s.logError(ctx, "start_streaming_message", err, "channel_id", request.GetChannelId(), "target_id", request.GetTargetId())
 		return nil, err
 	}
 

@@ -1,8 +1,10 @@
 package feishu
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"io"
 	stdhttp "net/http"
 	"strings"
 	"sync"
@@ -10,11 +12,14 @@ import (
 
 	"github.com/keelab/keelmesh/internal/domain"
 	"github.com/keelab/keelmesh/internal/infrastructure/persistence/memory/media"
-	channelhttp "github.com/keelab/keelmesh/internal/transport/http"
+	"github.com/keelab/keelmesh/internal/transport/http"
 	lark "github.com/larksuite/oapi-sdk-go/v3"
 	larkcore "github.com/larksuite/oapi-sdk-go/v3/core"
 	larkws "github.com/larksuite/oapi-sdk-go/v3/ws"
 )
+
+var _ domain.Channel = (*Channel)(nil)
+var _ domain.MediaChannel = (*Channel)(nil)
 
 type Config struct {
 	ID                string
@@ -24,13 +29,14 @@ type Config struct {
 	EncryptKey        string
 	VerificationToken string
 	AllowFrom         []string
+	GroupTrigger      domain.GroupTriggerPolicy
 	MediaRoot         string
 	RatePerSecond     float64
 	Burst             int
 	QueueSize         int
 	MaxRetries        int
 	MediaStore        domain.MediaDomain
-	HTTPClient        *channelhttp.Client
+	HTTPClient        *http.Client
 	Logger            larkcore.Logger
 }
 
@@ -67,11 +73,21 @@ func New(cfg Config) (*Channel, error) {
 }
 
 type larkHTTPClient struct {
-	client *channelhttp.Client
+	client *http.Client
 }
 
 func (c *larkHTTPClient) Do(request *stdhttp.Request) (*stdhttp.Response, error) {
-	return c.client.DoRaw(request.Context(), "feishu", request.Method, request)
+	return http.Do[*stdhttp.Response](request.Context(), c.client, "feishu", request.Method, request, func(_ context.Context, response *stdhttp.Response) (*stdhttp.Response, error) {
+		body, err := io.ReadAll(response.Body)
+		if err != nil {
+			return nil, err
+		}
+		cloned := new(stdhttp.Response)
+		*cloned = *response
+		cloned.Body = io.NopCloser(bytes.NewReader(body))
+		cloned.ContentLength = int64(len(body))
+		return cloned, nil
+	})
 }
 
 var _ larkcore.HttpClient = (*larkHTTPClient)(nil)

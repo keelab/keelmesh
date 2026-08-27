@@ -24,7 +24,7 @@ func newProtocolPolicies() (protocolPolicies, error) {
 	if err != nil {
 		return protocolPolicies{}, fmt.Errorf("build HTTP middleware: %w", err)
 	}
-	grpcDeadline, err := grpcinterceptor.NewTaskServiceBundle()
+	grpcDeadline, err := grpcinterceptor.NewClientDeadlineBundle()
 	if err != nil {
 		return protocolPolicies{}, fmt.Errorf("build gRPC middleware: %w", err)
 	}

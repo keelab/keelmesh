@@ -8,12 +8,13 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
-	"net/http"
+	stdhttp "net/http"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/keelab/keelmesh/internal/domain"
+	"github.com/keelab/keelmesh/internal/transport/http"
 )
 
 type fileInfo struct {
@@ -74,12 +75,12 @@ func (c *Channel) upload(ctx context.Context, endpoint, field, target, filename,
 	if err = mw.Close(); err != nil {
 		return "", err
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+"/"+endpoint, &body)
+	req, err := stdhttp.NewRequestWithContext(ctx, stdhttp.MethodPost, c.baseURL+"/"+endpoint, &body)
 	if err != nil {
 		return "", err
 	}
 	req.Header.Set("Content-Type", mw.FormDataContentType())
-	value, err := c.client.Do(ctx, "telegram", endpoint, req, func(_ context.Context, resp *http.Response) (any, error) {
+	messageID, err := http.Do[string](ctx, c.client, "telegram", endpoint, req, func(_ context.Context, resp *stdhttp.Response) (string, error) {
 		var envelope apiResponse[sentMessage]
 		if err := json.NewDecoder(resp.Body).Decode(&envelope); err != nil {
 			return "", err
@@ -89,12 +90,5 @@ func (c *Channel) upload(ctx context.Context, endpoint, field, target, filename,
 		}
 		return strconv.Itoa(envelope.Result.MessageID), nil
 	})
-	if err != nil {
-		return "", err
-	}
-	messageID, ok := value.(string)
-	if !ok {
-		return "", fmt.Errorf("telegram %s: unexpected response type %T", endpoint, value)
-	}
-	return messageID, nil
+	return messageID, err
 }

@@ -3,14 +3,14 @@ package telegram
 import (
 	"context"
 	"errors"
-	"fmt"
-	"net/http"
+	stdhttp "net/http"
 	"strconv"
 	"strings"
 	"sync/atomic"
 	"time"
 
 	"github.com/keelab/keelmesh/internal/domain"
+	"github.com/keelab/keelmesh/internal/transport/http"
 )
 
 type update struct {
@@ -20,7 +20,8 @@ type update struct {
 type message struct {
 	MessageID int `json:"message_id"`
 	Chat      struct {
-		ID int64 `json:"id"`
+		ID   int64  `json:"id"`
+		Type string `json:"type"`
 	} `json:"chat"`
 	From *struct {
 		ID        int64  `json:"id"`
@@ -135,7 +136,11 @@ func (c *Channel) handleUpdate(ctx context.Context, item update) {
 	sink := c.sink
 	c.mu.Unlock()
 	if sink != nil {
-		sink(domain.Inbound{ChannelID: c.config.ID, MessageID: strconv.Itoa(m.MessageID), ChatID: strconv.FormatInt(m.Chat.ID, 10), SenderID: senderID, SenderName: senderName, Content: content, Media: media, Metadata: map[string]string{"platform": "telegram"}, ReceivedAt: time.Now().UTC()})
+		scope := "direct"
+		if m.Chat.Type == "group" || m.Chat.Type == "supergroup" {
+			scope = "group"
+		}
+		sink(domain.Inbound{ChannelID: c.config.ID, MessageID: strconv.Itoa(m.MessageID), ChatID: strconv.FormatInt(m.Chat.ID, 10), SenderID: senderID, SenderName: senderName, Content: content, Media: media, Metadata: map[string]string{"platform": "telegram", "scope": scope}, ReceivedAt: time.Now().UTC()})
 	}
 }
 
@@ -148,26 +153,23 @@ func (c *Channel) ingestFile(ctx context.Context, fileID, kind, filename, conten
 		return domain.MediaPartEntity{}, err
 	}
 	base := strings.TrimSuffix(c.baseURL, "/bot"+c.config.Token)
-	request, err := http.NewRequestWithContext(ctx, http.MethodGet, base+"/file/bot"+c.config.Token+"/"+info.FilePath, nil)
+	request, err := stdhttp.NewRequestWithContext(ctx, stdhttp.MethodGet, base+"/file/bot"+c.config.Token+"/"+info.FilePath, nil)
 	if err != nil {
 		return domain.MediaPartEntity{}, err
 	}
-	value, err := c.client.Do(ctx, "telegram", "downloadFile", request, func(_ context.Context, response *http.Response) (any, error) {
-		part, err := c.config.MediaStore.Store(ctx, filename, contentType, response.Body)
-		if err != nil {
-			return domain.MediaPartEntity{}, err
-		}
-		part.Type = kind
-		return part, nil
-	})
+	value, err := http.Do[domain.MediaPartEntity](ctx, c.client, "telegram", "downloadFile", request,
+		func(_ context.Context, response *stdhttp.Response) (domain.MediaPartEntity, error) {
+			part, err := c.config.MediaStore.Store(ctx, filename, contentType, response.Body)
+			if err != nil {
+				return domain.MediaPartEntity{}, err
+			}
+			part.Type = kind
+			return part, nil
+		})
 	if err != nil {
 		return domain.MediaPartEntity{}, err
 	}
-	part, ok := value.(domain.MediaPartEntity)
-	if !ok {
-		return domain.MediaPartEntity{}, fmt.Errorf("telegram: unexpected download response type %T", value)
-	}
-	return part, nil
+	return value, nil
 }
 
 func (m *message) FromUsername() string {

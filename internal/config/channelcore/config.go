@@ -45,6 +45,7 @@ type Config struct {
 	AppName             string              `config:"app_name"`
 	Environment         string              `config:"environment"`
 	GRPCAddr            string              `config:"grpc_address"`
+	GateCoreAddress     string              `config:"gatecore_address"`
 	GRPCOpsAddr         string              `config:"grpc_ops_address"`
 	HTTPAddr            string              `config:"http_address"`
 	ShutdownTimeout     time.Duration       `config:"shutdown_timeout"`
@@ -65,6 +66,7 @@ type Definition struct {
 	EncryptKey        string                     `config:"encrypt_key"`
 	VerificationToken string                     `config:"verification_token"`
 	AllowFrom         []string                   `config:"allow_from"`
+	GroupTrigger      GroupTriggerConfig         `config:"group_trigger"`
 	MediaRoot         string                     `config:"media_root"`
 	RatePerSecond     float64                    `config:"rate_per_second"`
 	Burst             int                        `config:"burst"`
@@ -104,41 +106,46 @@ type TelegramChannelConfig struct {
 }
 
 type QQChannelConfig struct {
-	AppID         string   `config:"app_id"`
-	AppSecret     string   `config:"app_secret"`
-	AllowFrom     []string `config:"allow_from"`
-	WebhookListen string   `config:"webhook_listen"`
-	WebhookPath   string   `config:"webhook_path"`
+	AppID         string             `config:"app_id"`
+	AppSecret     string             `config:"app_secret"`
+	AllowFrom     []string           `config:"allow_from"`
+	GroupTrigger  GroupTriggerConfig `config:"group_trigger"`
+	WebhookListen string             `config:"webhook_listen"`
+	WebhookPath   string             `config:"webhook_path"`
 }
 type DingTalkChannelConfig struct {
-	ClientID     string   `config:"client_id"`
-	ClientSecret string   `config:"client_secret"`
-	AllowFrom    []string `config:"allow_from"`
+	ClientID     string             `config:"client_id"`
+	ClientSecret string             `config:"client_secret"`
+	AllowFrom    []string           `config:"allow_from"`
+	GroupTrigger GroupTriggerConfig `config:"group_trigger"`
 }
 type WeComChannelConfig struct {
-	Token          string   `config:"token"`
-	EncodingAESKey string   `config:"encoding_aes_key"`
-	WebhookURL     string   `config:"webhook_url"`
-	WebhookListen  string   `config:"webhook_listen"`
-	WebhookPath    string   `config:"webhook_path"`
-	AllowFrom      []string `config:"allow_from"`
+	Token          string             `config:"token"`
+	EncodingAESKey string             `config:"encoding_aes_key"`
+	WebhookURL     string             `config:"webhook_url"`
+	WebhookListen  string             `config:"webhook_listen"`
+	WebhookPath    string             `config:"webhook_path"`
+	AllowFrom      []string           `config:"allow_from"`
+	GroupTrigger   GroupTriggerConfig `config:"group_trigger"`
 }
 type WeComAppChannelConfig struct {
-	CorpID         string   `config:"corp_id"`
-	CorpSecret     string   `config:"corp_secret"`
-	AgentID        int64    `config:"agent_id"`
-	Token          string   `config:"token"`
-	EncodingAESKey string   `config:"encoding_aes_key"`
-	WebhookListen  string   `config:"webhook_listen"`
-	WebhookPath    string   `config:"webhook_path"`
-	AllowFrom      []string `config:"allow_from"`
+	CorpID         string             `config:"corp_id"`
+	CorpSecret     string             `config:"corp_secret"`
+	AgentID        int64              `config:"agent_id"`
+	Token          string             `config:"token"`
+	EncodingAESKey string             `config:"encoding_aes_key"`
+	WebhookListen  string             `config:"webhook_listen"`
+	WebhookPath    string             `config:"webhook_path"`
+	AllowFrom      []string           `config:"allow_from"`
+	GroupTrigger   GroupTriggerConfig `config:"group_trigger"`
 }
 type WeComAIBotChannelConfig struct {
-	Token          string   `config:"token"`
-	EncodingAESKey string   `config:"encoding_aes_key"`
-	WebhookListen  string   `config:"webhook_listen"`
-	WebhookPath    string   `config:"webhook_path"`
-	AllowFrom      []string `config:"allow_from"`
+	Token          string             `config:"token"`
+	EncodingAESKey string             `config:"encoding_aes_key"`
+	WebhookListen  string             `config:"webhook_listen"`
+	WebhookPath    string             `config:"webhook_path"`
+	AllowFrom      []string           `config:"allow_from"`
+	GroupTrigger   GroupTriggerConfig `config:"group_trigger"`
 }
 type WebhookChannelConfig struct {
 	OutboundURL string   `config:"outbound_url"`

@@ -1,0 +1,30 @@
+name: Bug 报告
+description: 报告可复现的缺陷
+title: "bug: "
+labels: [bug]
+body:
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤
+      description: 请提供最小复现步骤和预期/实际结果。
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 版本或提交
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境
+      description: Go 版本、操作系统及相关外部依赖。
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 脱敏日志
+      render: shell

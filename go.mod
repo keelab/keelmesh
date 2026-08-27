@@ -7,7 +7,7 @@ require (
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/keelab/contrib v0.0.1
 	github.com/keelab/keelith v0.0.3
-	github.com/larksuite/oapi-sdk-go/v3 v3.5.3
+	github.com/larksuite/oapi-sdk-go/v3 v3.10.0
 	github.com/open-dingtalk/dingtalk-stream-sdk-go v0.9.1
 	github.com/tencent-connect/botgo v0.2.1
 	go.opentelemetry.io/otel v1.45.0

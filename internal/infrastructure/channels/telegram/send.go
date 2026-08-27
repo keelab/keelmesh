@@ -6,11 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"net/http"
+	stdhttp "net/http"
 	"strconv"
 	"time"
 
 	"github.com/keelab/keelmesh/internal/domain"
+	"github.com/keelab/keelmesh/internal/transport/http"
 )
 
 type apiResponse[T any] struct {
@@ -35,12 +36,12 @@ func (c *Channel) Send(ctx context.Context, msg domain.Outbound) (domain.Receipt
 
 func (c *Channel) call(ctx context.Context, method string, params map[string]any, result any) error {
 	body, _ := json.Marshal(params)
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+"/"+method, bytes.NewReader(body))
+	req, err := stdhttp.NewRequestWithContext(ctx, stdhttp.MethodPost, c.baseURL+"/"+method, bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	_, err = c.client.Do(ctx, "telegram", method, req, func(_ context.Context, resp *http.Response) (any, error) {
+	_, err = http.Do[any](ctx, c.client, "telegram", method, req, func(_ context.Context, resp *stdhttp.Response) (any, error) {
 		data, err := io.ReadAll(io.LimitReader(resp.Body, 8<<20))
 		if err != nil {
 			return nil, err

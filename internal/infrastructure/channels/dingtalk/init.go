@@ -19,6 +19,7 @@ type Config struct {
 	ClientID      string
 	ClientSecret  string
 	AllowFrom     []string
+	GroupTrigger  domain.GroupTriggerPolicy
 	RatePerSecond float64
 	Burst         int
 	QueueSize     int

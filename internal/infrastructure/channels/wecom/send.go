@@ -6,11 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"net/http"
+	stdhttp "net/http"
 	"net/url"
 	"time"
 
 	"github.com/keelab/keelmesh/internal/domain"
+	"github.com/keelab/keelmesh/internal/transport/http"
 )
 
 func (c *Channel) Send(ctx context.Context, msg domain.Outbound) (domain.ReceiptEntity, error) {
@@ -45,12 +46,12 @@ func (c *Channel) Send(ctx context.Context, msg domain.Outbound) (domain.Receipt
 
 func (c *Channel) postJSON(ctx context.Context, endpoint string, value any) error {
 	body, _ := json.Marshal(value)
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(body))
+	req, err := stdhttp.NewRequestWithContext(ctx, stdhttp.MethodPost, endpoint, bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	_, err = c.client.Do(ctx, "wecom", "post", req, func(_ context.Context, response *http.Response) (any, error) {
+	_, err = http.Do[any](ctx, c.client, "wecom", "post", req, func(_ context.Context, response *stdhttp.Response) (any, error) {
 		_, _ = io.Copy(io.Discard, response.Body)
 		return nil, nil
 	})

@@ -300,6 +300,10 @@ type ChannelInfo struct {
 	Enabled       bool                   `protobuf:"varint,3,opt,name=enabled,proto3" json:"enabled,omitempty"`
 	Running       bool                   `protobuf:"varint,4,opt,name=running,proto3" json:"running,omitempty"`
 	Capabilities  []string               `protobuf:"bytes,5,rep,name=capabilities,proto3" json:"capabilities,omitempty"`
+	State         string                 `protobuf:"bytes,6,opt,name=state,proto3" json:"state,omitempty"`
+	Configured    bool                   `protobuf:"varint,7,opt,name=configured,proto3" json:"configured,omitempty"`
+	HealthStatus  string                 `protobuf:"bytes,8,opt,name=health_status,json=healthStatus,proto3" json:"health_status,omitempty"`
+	HealthMessage string                 `protobuf:"bytes,9,opt,name=health_message,json=healthMessage,proto3" json:"health_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -367,6 +371,34 @@ func (x *ChannelInfo) GetCapabilities() []string {
 		return x.Capabilities
 	}
 	return nil
+}
+
+func (x *ChannelInfo) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *ChannelInfo) GetConfigured() bool {
+	if x != nil {
+		return x.Configured
+	}
+	return false
+}
+
+func (x *ChannelInfo) GetHealthStatus() string {
+	if x != nil {
+		return x.HealthStatus
+	}
+	return ""
+}
+
+func (x *ChannelInfo) GetHealthMessage() string {
+	if x != nil {
+		return x.HealthMessage
+	}
+	return ""
 }
 
 type SendMessageRequest struct {
@@ -521,6 +553,326 @@ func (x *SendMessageResponse) GetState() string {
 	return ""
 }
 
+type SendNotificationRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	ChannelId      string                 `protobuf:"bytes,1,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty"`
+	TargetId       string                 `protobuf:"bytes,2,opt,name=target_id,json=targetId,proto3" json:"target_id,omitempty"`
+	Content        string                 `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`
+	Metadata       map[string]string      `protobuf:"bytes,4,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	MentionIds     []string               `protobuf:"bytes,5,rep,name=mention_ids,json=mentionIds,proto3" json:"mention_ids,omitempty"`
+	MentionAll     bool                   `protobuf:"varint,6,opt,name=mention_all,json=mentionAll,proto3" json:"mention_all,omitempty"`
+	Urgency        string                 `protobuf:"bytes,7,opt,name=urgency,proto3" json:"urgency,omitempty"`
+	IdempotencyKey string                 `protobuf:"bytes,8,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *SendNotificationRequest) Reset() {
+	*x = SendNotificationRequest{}
+	mi := &file_channel_v1_channel_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SendNotificationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SendNotificationRequest) ProtoMessage() {}
+
+func (x *SendNotificationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_channel_v1_channel_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SendNotificationRequest.ProtoReflect.Descriptor instead.
+func (*SendNotificationRequest) Descriptor() ([]byte, []int) {
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *SendNotificationRequest) GetChannelId() string {
+	if x != nil {
+		return x.ChannelId
+	}
+	return ""
+}
+
+func (x *SendNotificationRequest) GetTargetId() string {
+	if x != nil {
+		return x.TargetId
+	}
+	return ""
+}
+
+func (x *SendNotificationRequest) GetContent() string {
+	if x != nil {
+		return x.Content
+	}
+	return ""
+}
+
+func (x *SendNotificationRequest) GetMetadata() map[string]string {
+	if x != nil {
+		return x.Metadata
+	}
+	return nil
+}
+
+func (x *SendNotificationRequest) GetMentionIds() []string {
+	if x != nil {
+		return x.MentionIds
+	}
+	return nil
+}
+
+func (x *SendNotificationRequest) GetMentionAll() bool {
+	if x != nil {
+		return x.MentionAll
+	}
+	return false
+}
+
+func (x *SendNotificationRequest) GetUrgency() string {
+	if x != nil {
+		return x.Urgency
+	}
+	return ""
+}
+
+func (x *SendNotificationRequest) GetIdempotencyKey() string {
+	if x != nil {
+		return x.IdempotencyKey
+	}
+	return ""
+}
+
+type SendNotificationResponse struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	ChannelId         string                 `protobuf:"bytes,1,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty"`
+	MessageId         string                 `protobuf:"bytes,2,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	AcceptedAtMs      int64                  `protobuf:"varint,3,opt,name=accepted_at_ms,json=acceptedAtMs,proto3" json:"accepted_at_ms,omitempty"`
+	State             string                 `protobuf:"bytes,4,opt,name=state,proto3" json:"state,omitempty"`
+	InvalidMentionIds []string               `protobuf:"bytes,5,rep,name=invalid_mention_ids,json=invalidMentionIds,proto3" json:"invalid_mention_ids,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *SendNotificationResponse) Reset() {
+	*x = SendNotificationResponse{}
+	mi := &file_channel_v1_channel_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SendNotificationResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SendNotificationResponse) ProtoMessage() {}
+
+func (x *SendNotificationResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_channel_v1_channel_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SendNotificationResponse.ProtoReflect.Descriptor instead.
+func (*SendNotificationResponse) Descriptor() ([]byte, []int) {
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *SendNotificationResponse) GetChannelId() string {
+	if x != nil {
+		return x.ChannelId
+	}
+	return ""
+}
+
+func (x *SendNotificationResponse) GetMessageId() string {
+	if x != nil {
+		return x.MessageId
+	}
+	return ""
+}
+
+func (x *SendNotificationResponse) GetAcceptedAtMs() int64 {
+	if x != nil {
+		return x.AcceptedAtMs
+	}
+	return 0
+}
+
+func (x *SendNotificationResponse) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *SendNotificationResponse) GetInvalidMentionIds() []string {
+	if x != nil {
+		return x.InvalidMentionIds
+	}
+	return nil
+}
+
+type PrepareInboundRequest struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	ChannelId          string                 `protobuf:"bytes,1,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty"`
+	TargetId           string                 `protobuf:"bytes,2,opt,name=target_id,json=targetId,proto3" json:"target_id,omitempty"`
+	MessageId          string                 `protobuf:"bytes,3,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	ReplyToMessageId   string                 `protobuf:"bytes,4,opt,name=reply_to_message_id,json=replyToMessageId,proto3" json:"reply_to_message_id,omitempty"`
+	PlaceholderContent string                 `protobuf:"bytes,5,opt,name=placeholder_content,json=placeholderContent,proto3" json:"placeholder_content,omitempty"`
+	Reaction           string                 `protobuf:"bytes,6,opt,name=reaction,proto3" json:"reaction,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *PrepareInboundRequest) Reset() {
+	*x = PrepareInboundRequest{}
+	mi := &file_channel_v1_channel_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PrepareInboundRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PrepareInboundRequest) ProtoMessage() {}
+
+func (x *PrepareInboundRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_channel_v1_channel_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PrepareInboundRequest.ProtoReflect.Descriptor instead.
+func (*PrepareInboundRequest) Descriptor() ([]byte, []int) {
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *PrepareInboundRequest) GetChannelId() string {
+	if x != nil {
+		return x.ChannelId
+	}
+	return ""
+}
+
+func (x *PrepareInboundRequest) GetTargetId() string {
+	if x != nil {
+		return x.TargetId
+	}
+	return ""
+}
+
+func (x *PrepareInboundRequest) GetMessageId() string {
+	if x != nil {
+		return x.MessageId
+	}
+	return ""
+}
+
+func (x *PrepareInboundRequest) GetReplyToMessageId() string {
+	if x != nil {
+		return x.ReplyToMessageId
+	}
+	return ""
+}
+
+func (x *PrepareInboundRequest) GetPlaceholderContent() string {
+	if x != nil {
+		return x.PlaceholderContent
+	}
+	return ""
+}
+
+func (x *PrepareInboundRequest) GetReaction() string {
+	if x != nil {
+		return x.Reaction
+	}
+	return ""
+}
+
+type PrepareInboundResponse struct {
+	state                protoimpl.MessageState `protogen:"open.v1"`
+	TypingActionId       string                 `protobuf:"bytes,1,opt,name=typing_action_id,json=typingActionId,proto3" json:"typing_action_id,omitempty"`
+	ReactionActionId     string                 `protobuf:"bytes,2,opt,name=reaction_action_id,json=reactionActionId,proto3" json:"reaction_action_id,omitempty"`
+	PlaceholderMessageId string                 `protobuf:"bytes,3,opt,name=placeholder_message_id,json=placeholderMessageId,proto3" json:"placeholder_message_id,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *PrepareInboundResponse) Reset() {
+	*x = PrepareInboundResponse{}
+	mi := &file_channel_v1_channel_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PrepareInboundResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PrepareInboundResponse) ProtoMessage() {}
+
+func (x *PrepareInboundResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_channel_v1_channel_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PrepareInboundResponse.ProtoReflect.Descriptor instead.
+func (*PrepareInboundResponse) Descriptor() ([]byte, []int) {
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *PrepareInboundResponse) GetTypingActionId() string {
+	if x != nil {
+		return x.TypingActionId
+	}
+	return ""
+}
+
+func (x *PrepareInboundResponse) GetReactionActionId() string {
+	if x != nil {
+		return x.ReactionActionId
+	}
+	return ""
+}
+
+func (x *PrepareInboundResponse) GetPlaceholderMessageId() string {
+	if x != nil {
+		return x.PlaceholderMessageId
+	}
+	return ""
+}
+
 type SendMediaRequest struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	ChannelId      string                 `protobuf:"bytes,1,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty"`
@@ -534,7 +886,7 @@ type SendMediaRequest struct {
 
 func (x *SendMediaRequest) Reset() {
 	*x = SendMediaRequest{}
-	mi := &file_channel_v1_channel_proto_msgTypes[9]
+	mi := &file_channel_v1_channel_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -546,7 +898,7 @@ func (x *SendMediaRequest) String() string {
 func (*SendMediaRequest) ProtoMessage() {}
 
 func (x *SendMediaRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[9]
+	mi := &file_channel_v1_channel_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -559,7 +911,7 @@ func (x *SendMediaRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SendMediaRequest.ProtoReflect.Descriptor instead.
 func (*SendMediaRequest) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{9}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *SendMediaRequest) GetChannelId() string {
@@ -609,7 +961,7 @@ type SendMediaResponse struct {
 
 func (x *SendMediaResponse) Reset() {
 	*x = SendMediaResponse{}
-	mi := &file_channel_v1_channel_proto_msgTypes[10]
+	mi := &file_channel_v1_channel_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -621,7 +973,7 @@ func (x *SendMediaResponse) String() string {
 func (*SendMediaResponse) ProtoMessage() {}
 
 func (x *SendMediaResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[10]
+	mi := &file_channel_v1_channel_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -634,7 +986,7 @@ func (x *SendMediaResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SendMediaResponse.ProtoReflect.Descriptor instead.
 func (*SendMediaResponse) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{10}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *SendMediaResponse) GetChannelId() string {
@@ -674,7 +1026,7 @@ type GetDeliveryStatusRequest struct {
 
 func (x *GetDeliveryStatusRequest) Reset() {
 	*x = GetDeliveryStatusRequest{}
-	mi := &file_channel_v1_channel_proto_msgTypes[11]
+	mi := &file_channel_v1_channel_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -686,7 +1038,7 @@ func (x *GetDeliveryStatusRequest) String() string {
 func (*GetDeliveryStatusRequest) ProtoMessage() {}
 
 func (x *GetDeliveryStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[11]
+	mi := &file_channel_v1_channel_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -699,7 +1051,7 @@ func (x *GetDeliveryStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDeliveryStatusRequest.ProtoReflect.Descriptor instead.
 func (*GetDeliveryStatusRequest) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{11}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *GetDeliveryStatusRequest) GetMessageId() string {
@@ -723,7 +1075,7 @@ type GetDeliveryStatusResponse struct {
 
 func (x *GetDeliveryStatusResponse) Reset() {
 	*x = GetDeliveryStatusResponse{}
-	mi := &file_channel_v1_channel_proto_msgTypes[12]
+	mi := &file_channel_v1_channel_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -735,7 +1087,7 @@ func (x *GetDeliveryStatusResponse) String() string {
 func (*GetDeliveryStatusResponse) ProtoMessage() {}
 
 func (x *GetDeliveryStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[12]
+	mi := &file_channel_v1_channel_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -748,7 +1100,7 @@ func (x *GetDeliveryStatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDeliveryStatusResponse.ProtoReflect.Descriptor instead.
 func (*GetDeliveryStatusResponse) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{12}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *GetDeliveryStatusResponse) GetMessageId() string {
@@ -801,13 +1153,14 @@ type EditMessageRequest struct {
 	Content       string                 `protobuf:"bytes,4,opt,name=content,proto3" json:"content,omitempty"`
 	State         string                 `protobuf:"bytes,5,opt,name=state,proto3" json:"state,omitempty"`
 	Metadata      map[string]string      `protobuf:"bytes,6,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Progress      *ProgressSnapshot      `protobuf:"bytes,7,opt,name=progress,proto3" json:"progress,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *EditMessageRequest) Reset() {
 	*x = EditMessageRequest{}
-	mi := &file_channel_v1_channel_proto_msgTypes[13]
+	mi := &file_channel_v1_channel_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -819,7 +1172,7 @@ func (x *EditMessageRequest) String() string {
 func (*EditMessageRequest) ProtoMessage() {}
 
 func (x *EditMessageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[13]
+	mi := &file_channel_v1_channel_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -832,7 +1185,7 @@ func (x *EditMessageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EditMessageRequest.ProtoReflect.Descriptor instead.
 func (*EditMessageRequest) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{13}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *EditMessageRequest) GetChannelId() string {
@@ -877,6 +1230,13 @@ func (x *EditMessageRequest) GetMetadata() map[string]string {
 	return nil
 }
 
+func (x *EditMessageRequest) GetProgress() *ProgressSnapshot {
+	if x != nil {
+		return x.Progress
+	}
+	return nil
+}
+
 type EditMessageResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	MessageId     string                 `protobuf:"bytes,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
@@ -887,7 +1247,7 @@ type EditMessageResponse struct {
 
 func (x *EditMessageResponse) Reset() {
 	*x = EditMessageResponse{}
-	mi := &file_channel_v1_channel_proto_msgTypes[14]
+	mi := &file_channel_v1_channel_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -899,7 +1259,7 @@ func (x *EditMessageResponse) String() string {
 func (*EditMessageResponse) ProtoMessage() {}
 
 func (x *EditMessageResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[14]
+	mi := &file_channel_v1_channel_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -912,7 +1272,7 @@ func (x *EditMessageResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EditMessageResponse.ProtoReflect.Descriptor instead.
 func (*EditMessageResponse) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{14}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *EditMessageResponse) GetMessageId() string {
@@ -941,7 +1301,7 @@ type SendPlaceholderRequest struct {
 
 func (x *SendPlaceholderRequest) Reset() {
 	*x = SendPlaceholderRequest{}
-	mi := &file_channel_v1_channel_proto_msgTypes[15]
+	mi := &file_channel_v1_channel_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -953,7 +1313,7 @@ func (x *SendPlaceholderRequest) String() string {
 func (*SendPlaceholderRequest) ProtoMessage() {}
 
 func (x *SendPlaceholderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[15]
+	mi := &file_channel_v1_channel_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -966,7 +1326,7 @@ func (x *SendPlaceholderRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SendPlaceholderRequest.ProtoReflect.Descriptor instead.
 func (*SendPlaceholderRequest) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{15}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *SendPlaceholderRequest) GetChannelId() string {
@@ -1006,7 +1366,7 @@ type SendPlaceholderResponse struct {
 
 func (x *SendPlaceholderResponse) Reset() {
 	*x = SendPlaceholderResponse{}
-	mi := &file_channel_v1_channel_proto_msgTypes[16]
+	mi := &file_channel_v1_channel_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1018,7 +1378,7 @@ func (x *SendPlaceholderResponse) String() string {
 func (*SendPlaceholderResponse) ProtoMessage() {}
 
 func (x *SendPlaceholderResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[16]
+	mi := &file_channel_v1_channel_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1031,7 +1391,7 @@ func (x *SendPlaceholderResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SendPlaceholderResponse.ProtoReflect.Descriptor instead.
 func (*SendPlaceholderResponse) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{16}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *SendPlaceholderResponse) GetMessageId() string {
@@ -1051,7 +1411,7 @@ type StartTypingRequest struct {
 
 func (x *StartTypingRequest) Reset() {
 	*x = StartTypingRequest{}
-	mi := &file_channel_v1_channel_proto_msgTypes[17]
+	mi := &file_channel_v1_channel_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1063,7 +1423,7 @@ func (x *StartTypingRequest) String() string {
 func (*StartTypingRequest) ProtoMessage() {}
 
 func (x *StartTypingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[17]
+	mi := &file_channel_v1_channel_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1076,7 +1436,7 @@ func (x *StartTypingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartTypingRequest.ProtoReflect.Descriptor instead.
 func (*StartTypingRequest) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{17}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *StartTypingRequest) GetChannelId() string {
@@ -1102,7 +1462,7 @@ type StartTypingResponse struct {
 
 func (x *StartTypingResponse) Reset() {
 	*x = StartTypingResponse{}
-	mi := &file_channel_v1_channel_proto_msgTypes[18]
+	mi := &file_channel_v1_channel_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1114,7 +1474,7 @@ func (x *StartTypingResponse) String() string {
 func (*StartTypingResponse) ProtoMessage() {}
 
 func (x *StartTypingResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[18]
+	mi := &file_channel_v1_channel_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1127,7 +1487,7 @@ func (x *StartTypingResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartTypingResponse.ProtoReflect.Descriptor instead.
 func (*StartTypingResponse) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{18}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *StartTypingResponse) GetActionId() string {
@@ -1146,7 +1506,7 @@ type StopTypingRequest struct {
 
 func (x *StopTypingRequest) Reset() {
 	*x = StopTypingRequest{}
-	mi := &file_channel_v1_channel_proto_msgTypes[19]
+	mi := &file_channel_v1_channel_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1158,7 +1518,7 @@ func (x *StopTypingRequest) String() string {
 func (*StopTypingRequest) ProtoMessage() {}
 
 func (x *StopTypingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[19]
+	mi := &file_channel_v1_channel_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1171,7 +1531,7 @@ func (x *StopTypingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StopTypingRequest.ProtoReflect.Descriptor instead.
 func (*StopTypingRequest) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{19}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *StopTypingRequest) GetActionId() string {
@@ -1190,7 +1550,7 @@ type StopTypingResponse struct {
 
 func (x *StopTypingResponse) Reset() {
 	*x = StopTypingResponse{}
-	mi := &file_channel_v1_channel_proto_msgTypes[20]
+	mi := &file_channel_v1_channel_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1202,7 +1562,7 @@ func (x *StopTypingResponse) String() string {
 func (*StopTypingResponse) ProtoMessage() {}
 
 func (x *StopTypingResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[20]
+	mi := &file_channel_v1_channel_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1215,7 +1575,7 @@ func (x *StopTypingResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StopTypingResponse.ProtoReflect.Descriptor instead.
 func (*StopTypingResponse) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{20}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *StopTypingResponse) GetStopped() bool {
@@ -1237,7 +1597,7 @@ type ReactToMessageRequest struct {
 
 func (x *ReactToMessageRequest) Reset() {
 	*x = ReactToMessageRequest{}
-	mi := &file_channel_v1_channel_proto_msgTypes[21]
+	mi := &file_channel_v1_channel_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1249,7 +1609,7 @@ func (x *ReactToMessageRequest) String() string {
 func (*ReactToMessageRequest) ProtoMessage() {}
 
 func (x *ReactToMessageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[21]
+	mi := &file_channel_v1_channel_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1262,7 +1622,7 @@ func (x *ReactToMessageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReactToMessageRequest.ProtoReflect.Descriptor instead.
 func (*ReactToMessageRequest) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{21}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *ReactToMessageRequest) GetChannelId() string {
@@ -1302,7 +1662,7 @@ type ReactToMessageResponse struct {
 
 func (x *ReactToMessageResponse) Reset() {
 	*x = ReactToMessageResponse{}
-	mi := &file_channel_v1_channel_proto_msgTypes[22]
+	mi := &file_channel_v1_channel_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1314,7 +1674,7 @@ func (x *ReactToMessageResponse) String() string {
 func (*ReactToMessageResponse) ProtoMessage() {}
 
 func (x *ReactToMessageResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[22]
+	mi := &file_channel_v1_channel_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1327,7 +1687,7 @@ func (x *ReactToMessageResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReactToMessageResponse.ProtoReflect.Descriptor instead.
 func (*ReactToMessageResponse) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{22}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *ReactToMessageResponse) GetActionId() string {
@@ -1346,7 +1706,7 @@ type ReactionActionRequest struct {
 
 func (x *ReactionActionRequest) Reset() {
 	*x = ReactionActionRequest{}
-	mi := &file_channel_v1_channel_proto_msgTypes[23]
+	mi := &file_channel_v1_channel_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1358,7 +1718,7 @@ func (x *ReactionActionRequest) String() string {
 func (*ReactionActionRequest) ProtoMessage() {}
 
 func (x *ReactionActionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[23]
+	mi := &file_channel_v1_channel_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1371,7 +1731,7 @@ func (x *ReactionActionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReactionActionRequest.ProtoReflect.Descriptor instead.
 func (*ReactionActionRequest) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{23}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *ReactionActionRequest) GetActionId() string {
@@ -1390,7 +1750,7 @@ type ReactionActionResponse struct {
 
 func (x *ReactionActionResponse) Reset() {
 	*x = ReactionActionResponse{}
-	mi := &file_channel_v1_channel_proto_msgTypes[24]
+	mi := &file_channel_v1_channel_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1402,7 +1762,7 @@ func (x *ReactionActionResponse) String() string {
 func (*ReactionActionResponse) ProtoMessage() {}
 
 func (x *ReactionActionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[24]
+	mi := &file_channel_v1_channel_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1415,7 +1775,7 @@ func (x *ReactionActionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReactionActionResponse.ProtoReflect.Descriptor instead.
 func (*ReactionActionResponse) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{24}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *ReactionActionResponse) GetApplied() bool {
@@ -1437,7 +1797,7 @@ type StartStreamingMessageRequest struct {
 
 func (x *StartStreamingMessageRequest) Reset() {
 	*x = StartStreamingMessageRequest{}
-	mi := &file_channel_v1_channel_proto_msgTypes[25]
+	mi := &file_channel_v1_channel_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1449,7 +1809,7 @@ func (x *StartStreamingMessageRequest) String() string {
 func (*StartStreamingMessageRequest) ProtoMessage() {}
 
 func (x *StartStreamingMessageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[25]
+	mi := &file_channel_v1_channel_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1462,7 +1822,7 @@ func (x *StartStreamingMessageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartStreamingMessageRequest.ProtoReflect.Descriptor instead.
 func (*StartStreamingMessageRequest) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{25}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *StartStreamingMessageRequest) GetChannelId() string {
@@ -1502,7 +1862,7 @@ type StartStreamingMessageResponse struct {
 
 func (x *StartStreamingMessageResponse) Reset() {
 	*x = StartStreamingMessageResponse{}
-	mi := &file_channel_v1_channel_proto_msgTypes[26]
+	mi := &file_channel_v1_channel_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1514,7 +1874,7 @@ func (x *StartStreamingMessageResponse) String() string {
 func (*StartStreamingMessageResponse) ProtoMessage() {}
 
 func (x *StartStreamingMessageResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[26]
+	mi := &file_channel_v1_channel_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1527,7 +1887,7 @@ func (x *StartStreamingMessageResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartStreamingMessageResponse.ProtoReflect.Descriptor instead.
 func (*StartStreamingMessageResponse) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{26}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *StartStreamingMessageResponse) GetMessageId() string {
@@ -1549,7 +1909,7 @@ type UpdateStreamingMessageRequest struct {
 
 func (x *UpdateStreamingMessageRequest) Reset() {
 	*x = UpdateStreamingMessageRequest{}
-	mi := &file_channel_v1_channel_proto_msgTypes[27]
+	mi := &file_channel_v1_channel_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1561,7 +1921,7 @@ func (x *UpdateStreamingMessageRequest) String() string {
 func (*UpdateStreamingMessageRequest) ProtoMessage() {}
 
 func (x *UpdateStreamingMessageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[27]
+	mi := &file_channel_v1_channel_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1574,7 +1934,7 @@ func (x *UpdateStreamingMessageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateStreamingMessageRequest.ProtoReflect.Descriptor instead.
 func (*UpdateStreamingMessageRequest) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{27}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *UpdateStreamingMessageRequest) GetChannelId() string {
@@ -1614,7 +1974,7 @@ type UpdateStreamingMessageResponse struct {
 
 func (x *UpdateStreamingMessageResponse) Reset() {
 	*x = UpdateStreamingMessageResponse{}
-	mi := &file_channel_v1_channel_proto_msgTypes[28]
+	mi := &file_channel_v1_channel_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1626,7 +1986,7 @@ func (x *UpdateStreamingMessageResponse) String() string {
 func (*UpdateStreamingMessageResponse) ProtoMessage() {}
 
 func (x *UpdateStreamingMessageResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[28]
+	mi := &file_channel_v1_channel_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1639,7 +1999,7 @@ func (x *UpdateStreamingMessageResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateStreamingMessageResponse.ProtoReflect.Descriptor instead.
 func (*UpdateStreamingMessageResponse) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{28}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *UpdateStreamingMessageResponse) GetUpdated() bool {
@@ -1661,7 +2021,7 @@ type FinishStreamingMessageRequest struct {
 
 func (x *FinishStreamingMessageRequest) Reset() {
 	*x = FinishStreamingMessageRequest{}
-	mi := &file_channel_v1_channel_proto_msgTypes[29]
+	mi := &file_channel_v1_channel_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1673,7 +2033,7 @@ func (x *FinishStreamingMessageRequest) String() string {
 func (*FinishStreamingMessageRequest) ProtoMessage() {}
 
 func (x *FinishStreamingMessageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[29]
+	mi := &file_channel_v1_channel_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1686,7 +2046,7 @@ func (x *FinishStreamingMessageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FinishStreamingMessageRequest.ProtoReflect.Descriptor instead.
 func (*FinishStreamingMessageRequest) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{29}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *FinishStreamingMessageRequest) GetChannelId() string {
@@ -1726,7 +2086,7 @@ type FinishStreamingMessageResponse struct {
 
 func (x *FinishStreamingMessageResponse) Reset() {
 	*x = FinishStreamingMessageResponse{}
-	mi := &file_channel_v1_channel_proto_msgTypes[30]
+	mi := &file_channel_v1_channel_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1738,7 +2098,7 @@ func (x *FinishStreamingMessageResponse) String() string {
 func (*FinishStreamingMessageResponse) ProtoMessage() {}
 
 func (x *FinishStreamingMessageResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[30]
+	mi := &file_channel_v1_channel_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1751,7 +2111,7 @@ func (x *FinishStreamingMessageResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FinishStreamingMessageResponse.ProtoReflect.Descriptor instead.
 func (*FinishStreamingMessageResponse) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{30}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *FinishStreamingMessageResponse) GetFinished() bool {
@@ -1774,7 +2134,7 @@ type MediaPart struct {
 
 func (x *MediaPart) Reset() {
 	*x = MediaPart{}
-	mi := &file_channel_v1_channel_proto_msgTypes[31]
+	mi := &file_channel_v1_channel_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1786,7 +2146,7 @@ func (x *MediaPart) String() string {
 func (*MediaPart) ProtoMessage() {}
 
 func (x *MediaPart) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[31]
+	mi := &file_channel_v1_channel_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1799,7 +2159,7 @@ func (x *MediaPart) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MediaPart.ProtoReflect.Descriptor instead.
 func (*MediaPart) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{31}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *MediaPart) GetType() string {
@@ -1846,7 +2206,7 @@ type SubscribeInboundRequest struct {
 
 func (x *SubscribeInboundRequest) Reset() {
 	*x = SubscribeInboundRequest{}
-	mi := &file_channel_v1_channel_proto_msgTypes[32]
+	mi := &file_channel_v1_channel_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1858,7 +2218,7 @@ func (x *SubscribeInboundRequest) String() string {
 func (*SubscribeInboundRequest) ProtoMessage() {}
 
 func (x *SubscribeInboundRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[32]
+	mi := &file_channel_v1_channel_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1871,7 +2231,7 @@ func (x *SubscribeInboundRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubscribeInboundRequest.ProtoReflect.Descriptor instead.
 func (*SubscribeInboundRequest) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{32}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *SubscribeInboundRequest) GetChannelIds() []string {
@@ -1890,7 +2250,7 @@ type SubscribeInboundResponse struct {
 
 func (x *SubscribeInboundResponse) Reset() {
 	*x = SubscribeInboundResponse{}
-	mi := &file_channel_v1_channel_proto_msgTypes[33]
+	mi := &file_channel_v1_channel_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1902,7 +2262,7 @@ func (x *SubscribeInboundResponse) String() string {
 func (*SubscribeInboundResponse) ProtoMessage() {}
 
 func (x *SubscribeInboundResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[33]
+	mi := &file_channel_v1_channel_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1915,7 +2275,7 @@ func (x *SubscribeInboundResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubscribeInboundResponse.ProtoReflect.Descriptor instead.
 func (*SubscribeInboundResponse) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{33}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *SubscribeInboundResponse) GetMessage() *InboundMessage {
@@ -1936,13 +2296,17 @@ type InboundMessage struct {
 	Metadata      map[string]string      `protobuf:"bytes,7,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	ReceivedAtMs  int64                  `protobuf:"varint,8,opt,name=received_at_ms,json=receivedAtMs,proto3" json:"received_at_ms,omitempty"`
 	Media         []*MediaPart           `protobuf:"bytes,9,rep,name=media,proto3" json:"media,omitempty"`
+	Sender        *SenderInfo            `protobuf:"bytes,10,opt,name=sender,proto3" json:"sender,omitempty"`
+	Peer          *Peer                  `protobuf:"bytes,11,opt,name=peer,proto3" json:"peer,omitempty"`
+	SessionKey    string                 `protobuf:"bytes,12,opt,name=session_key,json=sessionKey,proto3" json:"session_key,omitempty"`
+	MediaScope    string                 `protobuf:"bytes,13,opt,name=media_scope,json=mediaScope,proto3" json:"media_scope,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *InboundMessage) Reset() {
 	*x = InboundMessage{}
-	mi := &file_channel_v1_channel_proto_msgTypes[34]
+	mi := &file_channel_v1_channel_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1954,7 +2318,7 @@ func (x *InboundMessage) String() string {
 func (*InboundMessage) ProtoMessage() {}
 
 func (x *InboundMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[34]
+	mi := &file_channel_v1_channel_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1967,7 +2331,7 @@ func (x *InboundMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InboundMessage.ProtoReflect.Descriptor instead.
 func (*InboundMessage) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{34}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *InboundMessage) GetChannelId() string {
@@ -2033,6 +2397,386 @@ func (x *InboundMessage) GetMedia() []*MediaPart {
 	return nil
 }
 
+func (x *InboundMessage) GetSender() *SenderInfo {
+	if x != nil {
+		return x.Sender
+	}
+	return nil
+}
+
+func (x *InboundMessage) GetPeer() *Peer {
+	if x != nil {
+		return x.Peer
+	}
+	return nil
+}
+
+func (x *InboundMessage) GetSessionKey() string {
+	if x != nil {
+		return x.SessionKey
+	}
+	return ""
+}
+
+func (x *InboundMessage) GetMediaScope() string {
+	if x != nil {
+		return x.MediaScope
+	}
+	return ""
+}
+
+type SenderInfo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Platform      string                 `protobuf:"bytes,1,opt,name=platform,proto3" json:"platform,omitempty"`
+	PlatformId    string                 `protobuf:"bytes,2,opt,name=platform_id,json=platformId,proto3" json:"platform_id,omitempty"`
+	CanonicalId   string                 `protobuf:"bytes,3,opt,name=canonical_id,json=canonicalId,proto3" json:"canonical_id,omitempty"`
+	Username      string                 `protobuf:"bytes,4,opt,name=username,proto3" json:"username,omitempty"`
+	DisplayName   string                 `protobuf:"bytes,5,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	AvatarUrl     string                 `protobuf:"bytes,6,opt,name=avatar_url,json=avatarUrl,proto3" json:"avatar_url,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SenderInfo) Reset() {
+	*x = SenderInfo{}
+	mi := &file_channel_v1_channel_proto_msgTypes[39]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SenderInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SenderInfo) ProtoMessage() {}
+
+func (x *SenderInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_channel_v1_channel_proto_msgTypes[39]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SenderInfo.ProtoReflect.Descriptor instead.
+func (*SenderInfo) Descriptor() ([]byte, []int) {
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{39}
+}
+
+func (x *SenderInfo) GetPlatform() string {
+	if x != nil {
+		return x.Platform
+	}
+	return ""
+}
+
+func (x *SenderInfo) GetPlatformId() string {
+	if x != nil {
+		return x.PlatformId
+	}
+	return ""
+}
+
+func (x *SenderInfo) GetCanonicalId() string {
+	if x != nil {
+		return x.CanonicalId
+	}
+	return ""
+}
+
+func (x *SenderInfo) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *SenderInfo) GetDisplayName() string {
+	if x != nil {
+		return x.DisplayName
+	}
+	return ""
+}
+
+func (x *SenderInfo) GetAvatarUrl() string {
+	if x != nil {
+		return x.AvatarUrl
+	}
+	return ""
+}
+
+type Peer struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Kind          string                 `protobuf:"bytes,1,opt,name=kind,proto3" json:"kind,omitempty"`
+	Id            string                 `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Peer) Reset() {
+	*x = Peer{}
+	mi := &file_channel_v1_channel_proto_msgTypes[40]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Peer) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Peer) ProtoMessage() {}
+
+func (x *Peer) ProtoReflect() protoreflect.Message {
+	mi := &file_channel_v1_channel_proto_msgTypes[40]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Peer.ProtoReflect.Descriptor instead.
+func (*Peer) Descriptor() ([]byte, []int) {
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{40}
+}
+
+func (x *Peer) GetKind() string {
+	if x != nil {
+		return x.Kind
+	}
+	return ""
+}
+
+func (x *Peer) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type ProgressSnapshot struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Status        string                 `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
+	Phase         string                 `protobuf:"bytes,2,opt,name=phase,proto3" json:"phase,omitempty"`
+	Preview       string                 `protobuf:"bytes,3,opt,name=preview,proto3" json:"preview,omitempty"`
+	Model         string                 `protobuf:"bytes,4,opt,name=model,proto3" json:"model,omitempty"`
+	Iteration     int32                  `protobuf:"varint,5,opt,name=iteration,proto3" json:"iteration,omitempty"`
+	Omitted       int32                  `protobuf:"varint,6,opt,name=omitted,proto3" json:"omitted,omitempty"`
+	ElapsedMs     int64                  `protobuf:"varint,7,opt,name=elapsed_ms,json=elapsedMs,proto3" json:"elapsed_ms,omitempty"`
+	UpdatedAt     string                 `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Steps         []*ProgressStep        `protobuf:"bytes,9,rep,name=steps,proto3" json:"steps,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ProgressSnapshot) Reset() {
+	*x = ProgressSnapshot{}
+	mi := &file_channel_v1_channel_proto_msgTypes[41]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProgressSnapshot) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProgressSnapshot) ProtoMessage() {}
+
+func (x *ProgressSnapshot) ProtoReflect() protoreflect.Message {
+	mi := &file_channel_v1_channel_proto_msgTypes[41]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProgressSnapshot.ProtoReflect.Descriptor instead.
+func (*ProgressSnapshot) Descriptor() ([]byte, []int) {
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{41}
+}
+
+func (x *ProgressSnapshot) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *ProgressSnapshot) GetPhase() string {
+	if x != nil {
+		return x.Phase
+	}
+	return ""
+}
+
+func (x *ProgressSnapshot) GetPreview() string {
+	if x != nil {
+		return x.Preview
+	}
+	return ""
+}
+
+func (x *ProgressSnapshot) GetModel() string {
+	if x != nil {
+		return x.Model
+	}
+	return ""
+}
+
+func (x *ProgressSnapshot) GetIteration() int32 {
+	if x != nil {
+		return x.Iteration
+	}
+	return 0
+}
+
+func (x *ProgressSnapshot) GetOmitted() int32 {
+	if x != nil {
+		return x.Omitted
+	}
+	return 0
+}
+
+func (x *ProgressSnapshot) GetElapsedMs() int64 {
+	if x != nil {
+		return x.ElapsedMs
+	}
+	return 0
+}
+
+func (x *ProgressSnapshot) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+func (x *ProgressSnapshot) GetSteps() []*ProgressStep {
+	if x != nil {
+		return x.Steps
+	}
+	return nil
+}
+
+type ProgressStep struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Kind          string                 `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
+	Status        string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
+	Title         string                 `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
+	Summary       string                 `protobuf:"bytes,5,opt,name=summary,proto3" json:"summary,omitempty"`
+	Detail        string                 `protobuf:"bytes,6,opt,name=detail,proto3" json:"detail,omitempty"`
+	Tool          string                 `protobuf:"bytes,7,opt,name=tool,proto3" json:"tool,omitempty"`
+	Iteration     int32                  `protobuf:"varint,8,opt,name=iteration,proto3" json:"iteration,omitempty"`
+	DurationMs    int64                  `protobuf:"varint,9,opt,name=duration_ms,json=durationMs,proto3" json:"duration_ms,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ProgressStep) Reset() {
+	*x = ProgressStep{}
+	mi := &file_channel_v1_channel_proto_msgTypes[42]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProgressStep) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProgressStep) ProtoMessage() {}
+
+func (x *ProgressStep) ProtoReflect() protoreflect.Message {
+	mi := &file_channel_v1_channel_proto_msgTypes[42]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProgressStep.ProtoReflect.Descriptor instead.
+func (*ProgressStep) Descriptor() ([]byte, []int) {
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{42}
+}
+
+func (x *ProgressStep) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *ProgressStep) GetKind() string {
+	if x != nil {
+		return x.Kind
+	}
+	return ""
+}
+
+func (x *ProgressStep) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *ProgressStep) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *ProgressStep) GetSummary() string {
+	if x != nil {
+		return x.Summary
+	}
+	return ""
+}
+
+func (x *ProgressStep) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *ProgressStep) GetTool() string {
+	if x != nil {
+		return x.Tool
+	}
+	return ""
+}
+
+func (x *ProgressStep) GetIteration() int32 {
+	if x != nil {
+		return x.Iteration
+	}
+	return 0
+}
+
+func (x *ProgressStep) GetDurationMs() int64 {
+	if x != nil {
+		return x.DurationMs
+	}
+	return 0
+}
+
 type UploadMediaRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Filename      string                 `protobuf:"bytes,1,opt,name=filename,proto3" json:"filename,omitempty"`
@@ -2044,7 +2788,7 @@ type UploadMediaRequest struct {
 
 func (x *UploadMediaRequest) Reset() {
 	*x = UploadMediaRequest{}
-	mi := &file_channel_v1_channel_proto_msgTypes[35]
+	mi := &file_channel_v1_channel_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2056,7 +2800,7 @@ func (x *UploadMediaRequest) String() string {
 func (*UploadMediaRequest) ProtoMessage() {}
 
 func (x *UploadMediaRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[35]
+	mi := &file_channel_v1_channel_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2069,7 +2813,7 @@ func (x *UploadMediaRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UploadMediaRequest.ProtoReflect.Descriptor instead.
 func (*UploadMediaRequest) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{35}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *UploadMediaRequest) GetFilename() string {
@@ -2102,7 +2846,7 @@ type UploadMediaResponse struct {
 
 func (x *UploadMediaResponse) Reset() {
 	*x = UploadMediaResponse{}
-	mi := &file_channel_v1_channel_proto_msgTypes[36]
+	mi := &file_channel_v1_channel_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2114,7 +2858,7 @@ func (x *UploadMediaResponse) String() string {
 func (*UploadMediaResponse) ProtoMessage() {}
 
 func (x *UploadMediaResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[36]
+	mi := &file_channel_v1_channel_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2127,7 +2871,7 @@ func (x *UploadMediaResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UploadMediaResponse.ProtoReflect.Descriptor instead.
 func (*UploadMediaResponse) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{36}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *UploadMediaResponse) GetMedia() *MediaPart {
@@ -2146,7 +2890,7 @@ type DownloadMediaRequest struct {
 
 func (x *DownloadMediaRequest) Reset() {
 	*x = DownloadMediaRequest{}
-	mi := &file_channel_v1_channel_proto_msgTypes[37]
+	mi := &file_channel_v1_channel_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2158,7 +2902,7 @@ func (x *DownloadMediaRequest) String() string {
 func (*DownloadMediaRequest) ProtoMessage() {}
 
 func (x *DownloadMediaRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[37]
+	mi := &file_channel_v1_channel_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2171,7 +2915,7 @@ func (x *DownloadMediaRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DownloadMediaRequest.ProtoReflect.Descriptor instead.
 func (*DownloadMediaRequest) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{37}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *DownloadMediaRequest) GetRef() string {
@@ -2192,7 +2936,7 @@ type DownloadMediaResponse struct {
 
 func (x *DownloadMediaResponse) Reset() {
 	*x = DownloadMediaResponse{}
-	mi := &file_channel_v1_channel_proto_msgTypes[38]
+	mi := &file_channel_v1_channel_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2204,7 +2948,7 @@ func (x *DownloadMediaResponse) String() string {
 func (*DownloadMediaResponse) ProtoMessage() {}
 
 func (x *DownloadMediaResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[38]
+	mi := &file_channel_v1_channel_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2217,7 +2961,7 @@ func (x *DownloadMediaResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DownloadMediaResponse.ProtoReflect.Descriptor instead.
 func (*DownloadMediaResponse) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{38}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *DownloadMediaResponse) GetFilename() string {
@@ -2250,7 +2994,7 @@ type ReleaseMediaRequest struct {
 
 func (x *ReleaseMediaRequest) Reset() {
 	*x = ReleaseMediaRequest{}
-	mi := &file_channel_v1_channel_proto_msgTypes[39]
+	mi := &file_channel_v1_channel_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2262,7 +3006,7 @@ func (x *ReleaseMediaRequest) String() string {
 func (*ReleaseMediaRequest) ProtoMessage() {}
 
 func (x *ReleaseMediaRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[39]
+	mi := &file_channel_v1_channel_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2275,7 +3019,7 @@ func (x *ReleaseMediaRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReleaseMediaRequest.ProtoReflect.Descriptor instead.
 func (*ReleaseMediaRequest) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{39}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *ReleaseMediaRequest) GetRef() string {
@@ -2294,7 +3038,7 @@ type ReleaseMediaResponse struct {
 
 func (x *ReleaseMediaResponse) Reset() {
 	*x = ReleaseMediaResponse{}
-	mi := &file_channel_v1_channel_proto_msgTypes[40]
+	mi := &file_channel_v1_channel_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2306,7 +3050,7 @@ func (x *ReleaseMediaResponse) String() string {
 func (*ReleaseMediaResponse) ProtoMessage() {}
 
 func (x *ReleaseMediaResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_channel_v1_channel_proto_msgTypes[40]
+	mi := &file_channel_v1_channel_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2319,7 +3063,7 @@ func (x *ReleaseMediaResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReleaseMediaResponse.ProtoReflect.Descriptor instead.
 func (*ReleaseMediaResponse) Descriptor() ([]byte, []int) {
-	return file_channel_v1_channel_proto_rawDescGZIP(), []int{40}
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{48}
 }
 
 func (x *ReleaseMediaResponse) GetReleased() bool {
@@ -2327,6 +3071,270 @@ func (x *ReleaseMediaResponse) GetReleased() bool {
 		return x.Released
 	}
 	return false
+}
+
+type RegisterCommandsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ChannelId     string                 `protobuf:"bytes,1,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty"`
+	Commands      []*CommandDefinition   `protobuf:"bytes,2,rep,name=commands,proto3" json:"commands,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RegisterCommandsRequest) Reset() {
+	*x = RegisterCommandsRequest{}
+	mi := &file_channel_v1_channel_proto_msgTypes[49]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RegisterCommandsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RegisterCommandsRequest) ProtoMessage() {}
+
+func (x *RegisterCommandsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_channel_v1_channel_proto_msgTypes[49]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RegisterCommandsRequest.ProtoReflect.Descriptor instead.
+func (*RegisterCommandsRequest) Descriptor() ([]byte, []int) {
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{49}
+}
+
+func (x *RegisterCommandsRequest) GetChannelId() string {
+	if x != nil {
+		return x.ChannelId
+	}
+	return ""
+}
+
+func (x *RegisterCommandsRequest) GetCommands() []*CommandDefinition {
+	if x != nil {
+		return x.Commands
+	}
+	return nil
+}
+
+type RegisterCommandsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ChannelId     string                 `protobuf:"bytes,1,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty"`
+	Registered    bool                   `protobuf:"varint,2,opt,name=registered,proto3" json:"registered,omitempty"`
+	CommandCount  int32                  `protobuf:"varint,3,opt,name=command_count,json=commandCount,proto3" json:"command_count,omitempty"`
+	State         string                 `protobuf:"bytes,4,opt,name=state,proto3" json:"state,omitempty"`
+	Reason        string                 `protobuf:"bytes,5,opt,name=reason,proto3" json:"reason,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RegisterCommandsResponse) Reset() {
+	*x = RegisterCommandsResponse{}
+	mi := &file_channel_v1_channel_proto_msgTypes[50]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RegisterCommandsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RegisterCommandsResponse) ProtoMessage() {}
+
+func (x *RegisterCommandsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_channel_v1_channel_proto_msgTypes[50]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RegisterCommandsResponse.ProtoReflect.Descriptor instead.
+func (*RegisterCommandsResponse) Descriptor() ([]byte, []int) {
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{50}
+}
+
+func (x *RegisterCommandsResponse) GetChannelId() string {
+	if x != nil {
+		return x.ChannelId
+	}
+	return ""
+}
+
+func (x *RegisterCommandsResponse) GetRegistered() bool {
+	if x != nil {
+		return x.Registered
+	}
+	return false
+}
+
+func (x *RegisterCommandsResponse) GetCommandCount() int32 {
+	if x != nil {
+		return x.CommandCount
+	}
+	return 0
+}
+
+func (x *RegisterCommandsResponse) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *RegisterCommandsResponse) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+type CommandDefinition struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	Usage         string                 `protobuf:"bytes,3,opt,name=usage,proto3" json:"usage,omitempty"`
+	Aliases       []string               `protobuf:"bytes,4,rep,name=aliases,proto3" json:"aliases,omitempty"`
+	Subcommands   []*CommandSubcommand   `protobuf:"bytes,5,rep,name=subcommands,proto3" json:"subcommands,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CommandDefinition) Reset() {
+	*x = CommandDefinition{}
+	mi := &file_channel_v1_channel_proto_msgTypes[51]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CommandDefinition) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CommandDefinition) ProtoMessage() {}
+
+func (x *CommandDefinition) ProtoReflect() protoreflect.Message {
+	mi := &file_channel_v1_channel_proto_msgTypes[51]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CommandDefinition.ProtoReflect.Descriptor instead.
+func (*CommandDefinition) Descriptor() ([]byte, []int) {
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{51}
+}
+
+func (x *CommandDefinition) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CommandDefinition) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *CommandDefinition) GetUsage() string {
+	if x != nil {
+		return x.Usage
+	}
+	return ""
+}
+
+func (x *CommandDefinition) GetAliases() []string {
+	if x != nil {
+		return x.Aliases
+	}
+	return nil
+}
+
+func (x *CommandDefinition) GetSubcommands() []*CommandSubcommand {
+	if x != nil {
+		return x.Subcommands
+	}
+	return nil
+}
+
+type CommandSubcommand struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	ArgsUsage     string                 `protobuf:"bytes,3,opt,name=args_usage,json=argsUsage,proto3" json:"args_usage,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CommandSubcommand) Reset() {
+	*x = CommandSubcommand{}
+	mi := &file_channel_v1_channel_proto_msgTypes[52]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CommandSubcommand) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CommandSubcommand) ProtoMessage() {}
+
+func (x *CommandSubcommand) ProtoReflect() protoreflect.Message {
+	mi := &file_channel_v1_channel_proto_msgTypes[52]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CommandSubcommand.ProtoReflect.Descriptor instead.
+func (*CommandSubcommand) Descriptor() ([]byte, []int) {
+	return file_channel_v1_channel_proto_rawDescGZIP(), []int{52}
+}
+
+func (x *CommandSubcommand) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CommandSubcommand) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *CommandSubcommand) GetArgsUsage() string {
+	if x != nil {
+		return x.ArgsUsage
+	}
+	return ""
 }
 
 var File_channel_v1_channel_proto protoreflect.FileDescriptor
@@ -2350,13 +3358,19 @@ const file_channel_v1_channel_proto_rawDesc = "" +
 	"\achannel\x18\x01 \x01(\v2\x17.channel.v1.ChannelInfoR\achannel\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status\x12\x1d\n" +
 	"\n" +
-	"latency_ms\x18\x03 \x01(\x03R\tlatencyMs\"\x89\x01\n" +
+	"latency_ms\x18\x03 \x01(\x03R\tlatencyMs\"\x8b\x02\n" +
 	"\vChannelInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04kind\x18\x02 \x01(\tR\x04kind\x12\x18\n" +
 	"\aenabled\x18\x03 \x01(\bR\aenabled\x12\x18\n" +
 	"\arunning\x18\x04 \x01(\bR\arunning\x12\"\n" +
-	"\fcapabilities\x18\x05 \x03(\tR\fcapabilities\"\xc9\x02\n" +
+	"\fcapabilities\x18\x05 \x03(\tR\fcapabilities\x12\x14\n" +
+	"\x05state\x18\x06 \x01(\tR\x05state\x12\x1e\n" +
+	"\n" +
+	"configured\x18\a \x01(\bR\n" +
+	"configured\x12#\n" +
+	"\rhealth_status\x18\b \x01(\tR\fhealthStatus\x12%\n" +
+	"\x0ehealth_message\x18\t \x01(\tR\rhealthMessage\"\xc9\x02\n" +
 	"\x12SendMessageRequest\x12\x1d\n" +
 	"\n" +
 	"channel_id\x18\x01 \x01(\tR\tchannelId\x12\x1b\n" +
@@ -2374,7 +3388,43 @@ const file_channel_v1_channel_proto_rawDesc = "" +
 	"\n" +
 	"message_id\x18\x02 \x01(\tR\tmessageId\x12$\n" +
 	"\x0eaccepted_at_ms\x18\x03 \x01(\x03R\facceptedAtMs\x12\x14\n" +
-	"\x05state\x18\x04 \x01(\tR\x05state\"\xa9\x02\n" +
+	"\x05state\x18\x04 \x01(\tR\x05state\"\x80\x03\n" +
+	"\x17SendNotificationRequest\x12\x1d\n" +
+	"\n" +
+	"channel_id\x18\x01 \x01(\tR\tchannelId\x12\x1b\n" +
+	"\ttarget_id\x18\x02 \x01(\tR\btargetId\x12\x18\n" +
+	"\acontent\x18\x03 \x01(\tR\acontent\x12M\n" +
+	"\bmetadata\x18\x04 \x03(\v21.channel.v1.SendNotificationRequest.MetadataEntryR\bmetadata\x12\x1f\n" +
+	"\vmention_ids\x18\x05 \x03(\tR\n" +
+	"mentionIds\x12\x1f\n" +
+	"\vmention_all\x18\x06 \x01(\bR\n" +
+	"mentionAll\x12\x18\n" +
+	"\aurgency\x18\a \x01(\tR\aurgency\x12'\n" +
+	"\x0fidempotency_key\x18\b \x01(\tR\x0eidempotencyKey\x1a;\n" +
+	"\rMetadataEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xc4\x01\n" +
+	"\x18SendNotificationResponse\x12\x1d\n" +
+	"\n" +
+	"channel_id\x18\x01 \x01(\tR\tchannelId\x12\x1d\n" +
+	"\n" +
+	"message_id\x18\x02 \x01(\tR\tmessageId\x12$\n" +
+	"\x0eaccepted_at_ms\x18\x03 \x01(\x03R\facceptedAtMs\x12\x14\n" +
+	"\x05state\x18\x04 \x01(\tR\x05state\x12.\n" +
+	"\x13invalid_mention_ids\x18\x05 \x03(\tR\x11invalidMentionIds\"\xee\x01\n" +
+	"\x15PrepareInboundRequest\x12\x1d\n" +
+	"\n" +
+	"channel_id\x18\x01 \x01(\tR\tchannelId\x12\x1b\n" +
+	"\ttarget_id\x18\x02 \x01(\tR\btargetId\x12\x1d\n" +
+	"\n" +
+	"message_id\x18\x03 \x01(\tR\tmessageId\x12-\n" +
+	"\x13reply_to_message_id\x18\x04 \x01(\tR\x10replyToMessageId\x12/\n" +
+	"\x13placeholder_content\x18\x05 \x01(\tR\x12placeholderContent\x12\x1a\n" +
+	"\breaction\x18\x06 \x01(\tR\breaction\"\xa6\x01\n" +
+	"\x16PrepareInboundResponse\x12(\n" +
+	"\x10typing_action_id\x18\x01 \x01(\tR\x0etypingActionId\x12,\n" +
+	"\x12reaction_action_id\x18\x02 \x01(\tR\x10reactionActionId\x124\n" +
+	"\x16placeholder_message_id\x18\x03 \x01(\tR\x14placeholderMessageId\"\xa9\x02\n" +
 	"\x10SendMediaRequest\x12\x1d\n" +
 	"\n" +
 	"channel_id\x18\x01 \x01(\tR\tchannelId\x12\x1b\n" +
@@ -2403,7 +3453,7 @@ const file_channel_v1_channel_proto_rawDesc = "" +
 	"\x05state\x18\x03 \x01(\tR\x05state\x12$\n" +
 	"\x0eaccepted_at_ms\x18\x04 \x01(\x03R\facceptedAtMs\x12\"\n" +
 	"\rupdated_at_ms\x18\x05 \x01(\x03R\vupdatedAtMs\x12\x14\n" +
-	"\x05error\x18\x06 \x01(\tR\x05error\"\xa6\x02\n" +
+	"\x05error\x18\x06 \x01(\tR\x05error\"\xe0\x02\n" +
 	"\x12EditMessageRequest\x12\x1d\n" +
 	"\n" +
 	"channel_id\x18\x01 \x01(\tR\tchannelId\x12\x1b\n" +
@@ -2412,7 +3462,8 @@ const file_channel_v1_channel_proto_rawDesc = "" +
 	"message_id\x18\x03 \x01(\tR\tmessageId\x12\x18\n" +
 	"\acontent\x18\x04 \x01(\tR\acontent\x12\x14\n" +
 	"\x05state\x18\x05 \x01(\tR\x05state\x12H\n" +
-	"\bmetadata\x18\x06 \x03(\v2,.channel.v1.EditMessageRequest.MetadataEntryR\bmetadata\x1a;\n" +
+	"\bmetadata\x18\x06 \x03(\v2,.channel.v1.EditMessageRequest.MetadataEntryR\bmetadata\x128\n" +
+	"\bprogress\x18\a \x01(\v2\x1c.channel.v1.ProgressSnapshotR\bprogress\x1a;\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"J\n" +
@@ -2489,7 +3540,7 @@ const file_channel_v1_channel_proto_rawDesc = "" +
 	"\vchannel_ids\x18\x01 \x03(\tR\n" +
 	"channelIds\"P\n" +
 	"\x18SubscribeInboundResponse\x124\n" +
-	"\amessage\x18\x01 \x01(\v2\x1a.channel.v1.InboundMessageR\amessage\"\x95\x03\n" +
+	"\amessage\x18\x01 \x01(\v2\x1a.channel.v1.InboundMessageR\amessage\"\xad\x04\n" +
 	"\x0eInboundMessage\x12\x1d\n" +
 	"\n" +
 	"channel_id\x18\x01 \x01(\tR\tchannelId\x12\x1d\n" +
@@ -2502,10 +3553,53 @@ const file_channel_v1_channel_proto_rawDesc = "" +
 	"\acontent\x18\x06 \x01(\tR\acontent\x12D\n" +
 	"\bmetadata\x18\a \x03(\v2(.channel.v1.InboundMessage.MetadataEntryR\bmetadata\x12$\n" +
 	"\x0ereceived_at_ms\x18\b \x01(\x03R\freceivedAtMs\x12+\n" +
-	"\x05media\x18\t \x03(\v2\x15.channel.v1.MediaPartR\x05media\x1a;\n" +
+	"\x05media\x18\t \x03(\v2\x15.channel.v1.MediaPartR\x05media\x12.\n" +
+	"\x06sender\x18\n" +
+	" \x01(\v2\x16.channel.v1.SenderInfoR\x06sender\x12$\n" +
+	"\x04peer\x18\v \x01(\v2\x10.channel.v1.PeerR\x04peer\x12\x1f\n" +
+	"\vsession_key\x18\f \x01(\tR\n" +
+	"sessionKey\x12\x1f\n" +
+	"\vmedia_scope\x18\r \x01(\tR\n" +
+	"mediaScope\x1a;\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"m\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xca\x01\n" +
+	"\n" +
+	"SenderInfo\x12\x1a\n" +
+	"\bplatform\x18\x01 \x01(\tR\bplatform\x12\x1f\n" +
+	"\vplatform_id\x18\x02 \x01(\tR\n" +
+	"platformId\x12!\n" +
+	"\fcanonical_id\x18\x03 \x01(\tR\vcanonicalId\x12\x1a\n" +
+	"\busername\x18\x04 \x01(\tR\busername\x12!\n" +
+	"\fdisplay_name\x18\x05 \x01(\tR\vdisplayName\x12\x1d\n" +
+	"\n" +
+	"avatar_url\x18\x06 \x01(\tR\tavatarUrl\"*\n" +
+	"\x04Peer\x12\x12\n" +
+	"\x04kind\x18\x01 \x01(\tR\x04kind\x12\x0e\n" +
+	"\x02id\x18\x02 \x01(\tR\x02id\"\x96\x02\n" +
+	"\x10ProgressSnapshot\x12\x16\n" +
+	"\x06status\x18\x01 \x01(\tR\x06status\x12\x14\n" +
+	"\x05phase\x18\x02 \x01(\tR\x05phase\x12\x18\n" +
+	"\apreview\x18\x03 \x01(\tR\apreview\x12\x14\n" +
+	"\x05model\x18\x04 \x01(\tR\x05model\x12\x1c\n" +
+	"\titeration\x18\x05 \x01(\x05R\titeration\x12\x18\n" +
+	"\aomitted\x18\x06 \x01(\x05R\aomitted\x12\x1d\n" +
+	"\n" +
+	"elapsed_ms\x18\a \x01(\x03R\telapsedMs\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\b \x01(\tR\tupdatedAt\x12.\n" +
+	"\x05steps\x18\t \x03(\v2\x18.channel.v1.ProgressStepR\x05steps\"\xe5\x01\n" +
+	"\fProgressStep\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04kind\x18\x02 \x01(\tR\x04kind\x12\x16\n" +
+	"\x06status\x18\x03 \x01(\tR\x06status\x12\x14\n" +
+	"\x05title\x18\x04 \x01(\tR\x05title\x12\x18\n" +
+	"\asummary\x18\x05 \x01(\tR\asummary\x12\x16\n" +
+	"\x06detail\x18\x06 \x01(\tR\x06detail\x12\x12\n" +
+	"\x04tool\x18\a \x01(\tR\x04tool\x12\x1c\n" +
+	"\titeration\x18\b \x01(\x05R\titeration\x12\x1f\n" +
+	"\vduration_ms\x18\t \x01(\x03R\n" +
+	"durationMs\"m\n" +
 	"\x12UploadMediaRequest\x12\x1a\n" +
 	"\bfilename\x18\x01 \x01(\tR\bfilename\x12!\n" +
 	"\fcontent_type\x18\x02 \x01(\tR\vcontentType\x12\x18\n" +
@@ -2521,13 +3615,39 @@ const file_channel_v1_channel_proto_rawDesc = "" +
 	"\x13ReleaseMediaRequest\x12\x10\n" +
 	"\x03ref\x18\x01 \x01(\tR\x03ref\"2\n" +
 	"\x14ReleaseMediaResponse\x12\x1a\n" +
-	"\breleased\x18\x01 \x01(\bR\breleased2\xff\r\n" +
+	"\breleased\x18\x01 \x01(\bR\breleased\"s\n" +
+	"\x17RegisterCommandsRequest\x12\x1d\n" +
+	"\n" +
+	"channel_id\x18\x01 \x01(\tR\tchannelId\x129\n" +
+	"\bcommands\x18\x02 \x03(\v2\x1d.channel.v1.CommandDefinitionR\bcommands\"\xac\x01\n" +
+	"\x18RegisterCommandsResponse\x12\x1d\n" +
+	"\n" +
+	"channel_id\x18\x01 \x01(\tR\tchannelId\x12\x1e\n" +
+	"\n" +
+	"registered\x18\x02 \x01(\bR\n" +
+	"registered\x12#\n" +
+	"\rcommand_count\x18\x03 \x01(\x05R\fcommandCount\x12\x14\n" +
+	"\x05state\x18\x04 \x01(\tR\x05state\x12\x16\n" +
+	"\x06reason\x18\x05 \x01(\tR\x06reason\"\xba\x01\n" +
+	"\x11CommandDefinition\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x14\n" +
+	"\x05usage\x18\x03 \x01(\tR\x05usage\x12\x18\n" +
+	"\aaliases\x18\x04 \x03(\tR\aaliases\x12?\n" +
+	"\vsubcommands\x18\x05 \x03(\v2\x1d.channel.v1.CommandSubcommandR\vsubcommands\"h\n" +
+	"\x11CommandSubcommand\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x1d\n" +
+	"\n" +
+	"args_usage\x18\x03 \x01(\tR\targsUsage2\x96\x10\n" +
 	"\x0eChannelService\x12Q\n" +
 	"\fListChannels\x12\x1f.channel.v1.ListChannelsRequest\x1a .channel.v1.ListChannelsResponse\x12K\n" +
 	"\n" +
 	"GetChannel\x12\x1d.channel.v1.GetChannelRequest\x1a\x1e.channel.v1.GetChannelResponse\x12Q\n" +
 	"\fProbeChannel\x12\x1f.channel.v1.ProbeChannelRequest\x1a .channel.v1.ProbeChannelResponse\x12N\n" +
-	"\vSendMessage\x12\x1e.channel.v1.SendMessageRequest\x1a\x1f.channel.v1.SendMessageResponse\x12H\n" +
+	"\vSendMessage\x12\x1e.channel.v1.SendMessageRequest\x1a\x1f.channel.v1.SendMessageResponse\x12]\n" +
+	"\x10SendNotification\x12#.channel.v1.SendNotificationRequest\x1a$.channel.v1.SendNotificationResponse\x12W\n" +
+	"\x0ePrepareInbound\x12!.channel.v1.PrepareInboundRequest\x1a\".channel.v1.PrepareInboundResponse\x12H\n" +
 	"\tSendMedia\x12\x1c.channel.v1.SendMediaRequest\x1a\x1d.channel.v1.SendMediaResponse\x12`\n" +
 	"\x11GetDeliveryStatus\x12$.channel.v1.GetDeliveryStatusRequest\x1a%.channel.v1.GetDeliveryStatusResponse\x12N\n" +
 	"\vEditMessage\x12\x1e.channel.v1.EditMessageRequest\x1a\x1f.channel.v1.EditMessageResponse\x12Z\n" +
@@ -2543,7 +3663,8 @@ const file_channel_v1_channel_proto_rawDesc = "" +
 	"\x16FinishStreamingMessage\x12).channel.v1.FinishStreamingMessageRequest\x1a*.channel.v1.FinishStreamingMessageResponse\x12N\n" +
 	"\vUploadMedia\x12\x1e.channel.v1.UploadMediaRequest\x1a\x1f.channel.v1.UploadMediaResponse\x12T\n" +
 	"\rDownloadMedia\x12 .channel.v1.DownloadMediaRequest\x1a!.channel.v1.DownloadMediaResponse\x12Q\n" +
-	"\fReleaseMedia\x12\x1f.channel.v1.ReleaseMediaRequest\x1a .channel.v1.ReleaseMediaResponse\x12_\n" +
+	"\fReleaseMedia\x12\x1f.channel.v1.ReleaseMediaRequest\x1a .channel.v1.ReleaseMediaResponse\x12]\n" +
+	"\x10RegisterCommands\x12#.channel.v1.RegisterCommandsRequest\x1a$.channel.v1.RegisterCommandsResponse\x12_\n" +
 	"\x10SubscribeInbound\x12#.channel.v1.SubscribeInboundRequest\x1a$.channel.v1.SubscribeInboundResponse0\x01B5Z3github.com/keelab/keelmesh/gen/channel/v1;channelv1b\x06proto3"
 
 var (
@@ -2558,7 +3679,7 @@ func file_channel_v1_channel_proto_rawDescGZIP() []byte {
 	return file_channel_v1_channel_proto_rawDescData
 }
 
-var file_channel_v1_channel_proto_msgTypes = make([]protoimpl.MessageInfo, 45)
+var file_channel_v1_channel_proto_msgTypes = make([]protoimpl.MessageInfo, 58)
 var file_channel_v1_channel_proto_goTypes = []any{
 	(*ListChannelsRequest)(nil),            // 0: channel.v1.ListChannelsRequest
 	(*ListChannelsResponse)(nil),           // 1: channel.v1.ListChannelsResponse
@@ -2569,100 +3690,126 @@ var file_channel_v1_channel_proto_goTypes = []any{
 	(*ChannelInfo)(nil),                    // 6: channel.v1.ChannelInfo
 	(*SendMessageRequest)(nil),             // 7: channel.v1.SendMessageRequest
 	(*SendMessageResponse)(nil),            // 8: channel.v1.SendMessageResponse
-	(*SendMediaRequest)(nil),               // 9: channel.v1.SendMediaRequest
-	(*SendMediaResponse)(nil),              // 10: channel.v1.SendMediaResponse
-	(*GetDeliveryStatusRequest)(nil),       // 11: channel.v1.GetDeliveryStatusRequest
-	(*GetDeliveryStatusResponse)(nil),      // 12: channel.v1.GetDeliveryStatusResponse
-	(*EditMessageRequest)(nil),             // 13: channel.v1.EditMessageRequest
-	(*EditMessageResponse)(nil),            // 14: channel.v1.EditMessageResponse
-	(*SendPlaceholderRequest)(nil),         // 15: channel.v1.SendPlaceholderRequest
-	(*SendPlaceholderResponse)(nil),        // 16: channel.v1.SendPlaceholderResponse
-	(*StartTypingRequest)(nil),             // 17: channel.v1.StartTypingRequest
-	(*StartTypingResponse)(nil),            // 18: channel.v1.StartTypingResponse
-	(*StopTypingRequest)(nil),              // 19: channel.v1.StopTypingRequest
-	(*StopTypingResponse)(nil),             // 20: channel.v1.StopTypingResponse
-	(*ReactToMessageRequest)(nil),          // 21: channel.v1.ReactToMessageRequest
-	(*ReactToMessageResponse)(nil),         // 22: channel.v1.ReactToMessageResponse
-	(*ReactionActionRequest)(nil),          // 23: channel.v1.ReactionActionRequest
-	(*ReactionActionResponse)(nil),         // 24: channel.v1.ReactionActionResponse
-	(*StartStreamingMessageRequest)(nil),   // 25: channel.v1.StartStreamingMessageRequest
-	(*StartStreamingMessageResponse)(nil),  // 26: channel.v1.StartStreamingMessageResponse
-	(*UpdateStreamingMessageRequest)(nil),  // 27: channel.v1.UpdateStreamingMessageRequest
-	(*UpdateStreamingMessageResponse)(nil), // 28: channel.v1.UpdateStreamingMessageResponse
-	(*FinishStreamingMessageRequest)(nil),  // 29: channel.v1.FinishStreamingMessageRequest
-	(*FinishStreamingMessageResponse)(nil), // 30: channel.v1.FinishStreamingMessageResponse
-	(*MediaPart)(nil),                      // 31: channel.v1.MediaPart
-	(*SubscribeInboundRequest)(nil),        // 32: channel.v1.SubscribeInboundRequest
-	(*SubscribeInboundResponse)(nil),       // 33: channel.v1.SubscribeInboundResponse
-	(*InboundMessage)(nil),                 // 34: channel.v1.InboundMessage
-	(*UploadMediaRequest)(nil),             // 35: channel.v1.UploadMediaRequest
-	(*UploadMediaResponse)(nil),            // 36: channel.v1.UploadMediaResponse
-	(*DownloadMediaRequest)(nil),           // 37: channel.v1.DownloadMediaRequest
-	(*DownloadMediaResponse)(nil),          // 38: channel.v1.DownloadMediaResponse
-	(*ReleaseMediaRequest)(nil),            // 39: channel.v1.ReleaseMediaRequest
-	(*ReleaseMediaResponse)(nil),           // 40: channel.v1.ReleaseMediaResponse
-	nil,                                    // 41: channel.v1.SendMessageRequest.MetadataEntry
-	nil,                                    // 42: channel.v1.SendMediaRequest.MetadataEntry
-	nil,                                    // 43: channel.v1.EditMessageRequest.MetadataEntry
-	nil,                                    // 44: channel.v1.InboundMessage.MetadataEntry
+	(*SendNotificationRequest)(nil),        // 9: channel.v1.SendNotificationRequest
+	(*SendNotificationResponse)(nil),       // 10: channel.v1.SendNotificationResponse
+	(*PrepareInboundRequest)(nil),          // 11: channel.v1.PrepareInboundRequest
+	(*PrepareInboundResponse)(nil),         // 12: channel.v1.PrepareInboundResponse
+	(*SendMediaRequest)(nil),               // 13: channel.v1.SendMediaRequest
+	(*SendMediaResponse)(nil),              // 14: channel.v1.SendMediaResponse
+	(*GetDeliveryStatusRequest)(nil),       // 15: channel.v1.GetDeliveryStatusRequest
+	(*GetDeliveryStatusResponse)(nil),      // 16: channel.v1.GetDeliveryStatusResponse
+	(*EditMessageRequest)(nil),             // 17: channel.v1.EditMessageRequest
+	(*EditMessageResponse)(nil),            // 18: channel.v1.EditMessageResponse
+	(*SendPlaceholderRequest)(nil),         // 19: channel.v1.SendPlaceholderRequest
+	(*SendPlaceholderResponse)(nil),        // 20: channel.v1.SendPlaceholderResponse
+	(*StartTypingRequest)(nil),             // 21: channel.v1.StartTypingRequest
+	(*StartTypingResponse)(nil),            // 22: channel.v1.StartTypingResponse
+	(*StopTypingRequest)(nil),              // 23: channel.v1.StopTypingRequest
+	(*StopTypingResponse)(nil),             // 24: channel.v1.StopTypingResponse
+	(*ReactToMessageRequest)(nil),          // 25: channel.v1.ReactToMessageRequest
+	(*ReactToMessageResponse)(nil),         // 26: channel.v1.ReactToMessageResponse
+	(*ReactionActionRequest)(nil),          // 27: channel.v1.ReactionActionRequest
+	(*ReactionActionResponse)(nil),         // 28: channel.v1.ReactionActionResponse
+	(*StartStreamingMessageRequest)(nil),   // 29: channel.v1.StartStreamingMessageRequest
+	(*StartStreamingMessageResponse)(nil),  // 30: channel.v1.StartStreamingMessageResponse
+	(*UpdateStreamingMessageRequest)(nil),  // 31: channel.v1.UpdateStreamingMessageRequest
+	(*UpdateStreamingMessageResponse)(nil), // 32: channel.v1.UpdateStreamingMessageResponse
+	(*FinishStreamingMessageRequest)(nil),  // 33: channel.v1.FinishStreamingMessageRequest
+	(*FinishStreamingMessageResponse)(nil), // 34: channel.v1.FinishStreamingMessageResponse
+	(*MediaPart)(nil),                      // 35: channel.v1.MediaPart
+	(*SubscribeInboundRequest)(nil),        // 36: channel.v1.SubscribeInboundRequest
+	(*SubscribeInboundResponse)(nil),       // 37: channel.v1.SubscribeInboundResponse
+	(*InboundMessage)(nil),                 // 38: channel.v1.InboundMessage
+	(*SenderInfo)(nil),                     // 39: channel.v1.SenderInfo
+	(*Peer)(nil),                           // 40: channel.v1.Peer
+	(*ProgressSnapshot)(nil),               // 41: channel.v1.ProgressSnapshot
+	(*ProgressStep)(nil),                   // 42: channel.v1.ProgressStep
+	(*UploadMediaRequest)(nil),             // 43: channel.v1.UploadMediaRequest
+	(*UploadMediaResponse)(nil),            // 44: channel.v1.UploadMediaResponse
+	(*DownloadMediaRequest)(nil),           // 45: channel.v1.DownloadMediaRequest
+	(*DownloadMediaResponse)(nil),          // 46: channel.v1.DownloadMediaResponse
+	(*ReleaseMediaRequest)(nil),            // 47: channel.v1.ReleaseMediaRequest
+	(*ReleaseMediaResponse)(nil),           // 48: channel.v1.ReleaseMediaResponse
+	(*RegisterCommandsRequest)(nil),        // 49: channel.v1.RegisterCommandsRequest
+	(*RegisterCommandsResponse)(nil),       // 50: channel.v1.RegisterCommandsResponse
+	(*CommandDefinition)(nil),              // 51: channel.v1.CommandDefinition
+	(*CommandSubcommand)(nil),              // 52: channel.v1.CommandSubcommand
+	nil,                                    // 53: channel.v1.SendMessageRequest.MetadataEntry
+	nil,                                    // 54: channel.v1.SendNotificationRequest.MetadataEntry
+	nil,                                    // 55: channel.v1.SendMediaRequest.MetadataEntry
+	nil,                                    // 56: channel.v1.EditMessageRequest.MetadataEntry
+	nil,                                    // 57: channel.v1.InboundMessage.MetadataEntry
 }
 var file_channel_v1_channel_proto_depIdxs = []int32{
 	6,  // 0: channel.v1.ListChannelsResponse.channels:type_name -> channel.v1.ChannelInfo
 	6,  // 1: channel.v1.GetChannelResponse.channel:type_name -> channel.v1.ChannelInfo
 	6,  // 2: channel.v1.ProbeChannelResponse.channel:type_name -> channel.v1.ChannelInfo
-	41, // 3: channel.v1.SendMessageRequest.metadata:type_name -> channel.v1.SendMessageRequest.MetadataEntry
-	31, // 4: channel.v1.SendMediaRequest.parts:type_name -> channel.v1.MediaPart
-	42, // 5: channel.v1.SendMediaRequest.metadata:type_name -> channel.v1.SendMediaRequest.MetadataEntry
-	43, // 6: channel.v1.EditMessageRequest.metadata:type_name -> channel.v1.EditMessageRequest.MetadataEntry
-	34, // 7: channel.v1.SubscribeInboundResponse.message:type_name -> channel.v1.InboundMessage
-	44, // 8: channel.v1.InboundMessage.metadata:type_name -> channel.v1.InboundMessage.MetadataEntry
-	31, // 9: channel.v1.InboundMessage.media:type_name -> channel.v1.MediaPart
-	31, // 10: channel.v1.UploadMediaResponse.media:type_name -> channel.v1.MediaPart
-	0,  // 11: channel.v1.ChannelService.ListChannels:input_type -> channel.v1.ListChannelsRequest
-	2,  // 12: channel.v1.ChannelService.GetChannel:input_type -> channel.v1.GetChannelRequest
-	4,  // 13: channel.v1.ChannelService.ProbeChannel:input_type -> channel.v1.ProbeChannelRequest
-	7,  // 14: channel.v1.ChannelService.SendMessage:input_type -> channel.v1.SendMessageRequest
-	9,  // 15: channel.v1.ChannelService.SendMedia:input_type -> channel.v1.SendMediaRequest
-	11, // 16: channel.v1.ChannelService.GetDeliveryStatus:input_type -> channel.v1.GetDeliveryStatusRequest
-	13, // 17: channel.v1.ChannelService.EditMessage:input_type -> channel.v1.EditMessageRequest
-	15, // 18: channel.v1.ChannelService.SendPlaceholder:input_type -> channel.v1.SendPlaceholderRequest
-	17, // 19: channel.v1.ChannelService.StartTyping:input_type -> channel.v1.StartTypingRequest
-	19, // 20: channel.v1.ChannelService.StopTyping:input_type -> channel.v1.StopTypingRequest
-	21, // 21: channel.v1.ChannelService.ReactToMessage:input_type -> channel.v1.ReactToMessageRequest
-	23, // 22: channel.v1.ChannelService.CompleteReaction:input_type -> channel.v1.ReactionActionRequest
-	23, // 23: channel.v1.ChannelService.ExpireReaction:input_type -> channel.v1.ReactionActionRequest
-	25, // 24: channel.v1.ChannelService.StartStreamingMessage:input_type -> channel.v1.StartStreamingMessageRequest
-	27, // 25: channel.v1.ChannelService.UpdateStreamingMessage:input_type -> channel.v1.UpdateStreamingMessageRequest
-	29, // 26: channel.v1.ChannelService.FinishStreamingMessage:input_type -> channel.v1.FinishStreamingMessageRequest
-	35, // 27: channel.v1.ChannelService.UploadMedia:input_type -> channel.v1.UploadMediaRequest
-	37, // 28: channel.v1.ChannelService.DownloadMedia:input_type -> channel.v1.DownloadMediaRequest
-	39, // 29: channel.v1.ChannelService.ReleaseMedia:input_type -> channel.v1.ReleaseMediaRequest
-	32, // 30: channel.v1.ChannelService.SubscribeInbound:input_type -> channel.v1.SubscribeInboundRequest
-	1,  // 31: channel.v1.ChannelService.ListChannels:output_type -> channel.v1.ListChannelsResponse
-	3,  // 32: channel.v1.ChannelService.GetChannel:output_type -> channel.v1.GetChannelResponse
-	5,  // 33: channel.v1.ChannelService.ProbeChannel:output_type -> channel.v1.ProbeChannelResponse
-	8,  // 34: channel.v1.ChannelService.SendMessage:output_type -> channel.v1.SendMessageResponse
-	10, // 35: channel.v1.ChannelService.SendMedia:output_type -> channel.v1.SendMediaResponse
-	12, // 36: channel.v1.ChannelService.GetDeliveryStatus:output_type -> channel.v1.GetDeliveryStatusResponse
-	14, // 37: channel.v1.ChannelService.EditMessage:output_type -> channel.v1.EditMessageResponse
-	16, // 38: channel.v1.ChannelService.SendPlaceholder:output_type -> channel.v1.SendPlaceholderResponse
-	18, // 39: channel.v1.ChannelService.StartTyping:output_type -> channel.v1.StartTypingResponse
-	20, // 40: channel.v1.ChannelService.StopTyping:output_type -> channel.v1.StopTypingResponse
-	22, // 41: channel.v1.ChannelService.ReactToMessage:output_type -> channel.v1.ReactToMessageResponse
-	24, // 42: channel.v1.ChannelService.CompleteReaction:output_type -> channel.v1.ReactionActionResponse
-	24, // 43: channel.v1.ChannelService.ExpireReaction:output_type -> channel.v1.ReactionActionResponse
-	26, // 44: channel.v1.ChannelService.StartStreamingMessage:output_type -> channel.v1.StartStreamingMessageResponse
-	28, // 45: channel.v1.ChannelService.UpdateStreamingMessage:output_type -> channel.v1.UpdateStreamingMessageResponse
-	30, // 46: channel.v1.ChannelService.FinishStreamingMessage:output_type -> channel.v1.FinishStreamingMessageResponse
-	36, // 47: channel.v1.ChannelService.UploadMedia:output_type -> channel.v1.UploadMediaResponse
-	38, // 48: channel.v1.ChannelService.DownloadMedia:output_type -> channel.v1.DownloadMediaResponse
-	40, // 49: channel.v1.ChannelService.ReleaseMedia:output_type -> channel.v1.ReleaseMediaResponse
-	33, // 50: channel.v1.ChannelService.SubscribeInbound:output_type -> channel.v1.SubscribeInboundResponse
-	31, // [31:51] is the sub-list for method output_type
-	11, // [11:31] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	53, // 3: channel.v1.SendMessageRequest.metadata:type_name -> channel.v1.SendMessageRequest.MetadataEntry
+	54, // 4: channel.v1.SendNotificationRequest.metadata:type_name -> channel.v1.SendNotificationRequest.MetadataEntry
+	35, // 5: channel.v1.SendMediaRequest.parts:type_name -> channel.v1.MediaPart
+	55, // 6: channel.v1.SendMediaRequest.metadata:type_name -> channel.v1.SendMediaRequest.MetadataEntry
+	56, // 7: channel.v1.EditMessageRequest.metadata:type_name -> channel.v1.EditMessageRequest.MetadataEntry
+	41, // 8: channel.v1.EditMessageRequest.progress:type_name -> channel.v1.ProgressSnapshot
+	38, // 9: channel.v1.SubscribeInboundResponse.message:type_name -> channel.v1.InboundMessage
+	57, // 10: channel.v1.InboundMessage.metadata:type_name -> channel.v1.InboundMessage.MetadataEntry
+	35, // 11: channel.v1.InboundMessage.media:type_name -> channel.v1.MediaPart
+	39, // 12: channel.v1.InboundMessage.sender:type_name -> channel.v1.SenderInfo
+	40, // 13: channel.v1.InboundMessage.peer:type_name -> channel.v1.Peer
+	42, // 14: channel.v1.ProgressSnapshot.steps:type_name -> channel.v1.ProgressStep
+	35, // 15: channel.v1.UploadMediaResponse.media:type_name -> channel.v1.MediaPart
+	51, // 16: channel.v1.RegisterCommandsRequest.commands:type_name -> channel.v1.CommandDefinition
+	52, // 17: channel.v1.CommandDefinition.subcommands:type_name -> channel.v1.CommandSubcommand
+	0,  // 18: channel.v1.ChannelService.ListChannels:input_type -> channel.v1.ListChannelsRequest
+	2,  // 19: channel.v1.ChannelService.GetChannel:input_type -> channel.v1.GetChannelRequest
+	4,  // 20: channel.v1.ChannelService.ProbeChannel:input_type -> channel.v1.ProbeChannelRequest
+	7,  // 21: channel.v1.ChannelService.SendMessage:input_type -> channel.v1.SendMessageRequest
+	9,  // 22: channel.v1.ChannelService.SendNotification:input_type -> channel.v1.SendNotificationRequest
+	11, // 23: channel.v1.ChannelService.PrepareInbound:input_type -> channel.v1.PrepareInboundRequest
+	13, // 24: channel.v1.ChannelService.SendMedia:input_type -> channel.v1.SendMediaRequest
+	15, // 25: channel.v1.ChannelService.GetDeliveryStatus:input_type -> channel.v1.GetDeliveryStatusRequest
+	17, // 26: channel.v1.ChannelService.EditMessage:input_type -> channel.v1.EditMessageRequest
+	19, // 27: channel.v1.ChannelService.SendPlaceholder:input_type -> channel.v1.SendPlaceholderRequest
+	21, // 28: channel.v1.ChannelService.StartTyping:input_type -> channel.v1.StartTypingRequest
+	23, // 29: channel.v1.ChannelService.StopTyping:input_type -> channel.v1.StopTypingRequest
+	25, // 30: channel.v1.ChannelService.ReactToMessage:input_type -> channel.v1.ReactToMessageRequest
+	27, // 31: channel.v1.ChannelService.CompleteReaction:input_type -> channel.v1.ReactionActionRequest
+	27, // 32: channel.v1.ChannelService.ExpireReaction:input_type -> channel.v1.ReactionActionRequest
+	29, // 33: channel.v1.ChannelService.StartStreamingMessage:input_type -> channel.v1.StartStreamingMessageRequest
+	31, // 34: channel.v1.ChannelService.UpdateStreamingMessage:input_type -> channel.v1.UpdateStreamingMessageRequest
+	33, // 35: channel.v1.ChannelService.FinishStreamingMessage:input_type -> channel.v1.FinishStreamingMessageRequest
+	43, // 36: channel.v1.ChannelService.UploadMedia:input_type -> channel.v1.UploadMediaRequest
+	45, // 37: channel.v1.ChannelService.DownloadMedia:input_type -> channel.v1.DownloadMediaRequest
+	47, // 38: channel.v1.ChannelService.ReleaseMedia:input_type -> channel.v1.ReleaseMediaRequest
+	49, // 39: channel.v1.ChannelService.RegisterCommands:input_type -> channel.v1.RegisterCommandsRequest
+	36, // 40: channel.v1.ChannelService.SubscribeInbound:input_type -> channel.v1.SubscribeInboundRequest
+	1,  // 41: channel.v1.ChannelService.ListChannels:output_type -> channel.v1.ListChannelsResponse
+	3,  // 42: channel.v1.ChannelService.GetChannel:output_type -> channel.v1.GetChannelResponse
+	5,  // 43: channel.v1.ChannelService.ProbeChannel:output_type -> channel.v1.ProbeChannelResponse
+	8,  // 44: channel.v1.ChannelService.SendMessage:output_type -> channel.v1.SendMessageResponse
+	10, // 45: channel.v1.ChannelService.SendNotification:output_type -> channel.v1.SendNotificationResponse
+	12, // 46: channel.v1.ChannelService.PrepareInbound:output_type -> channel.v1.PrepareInboundResponse
+	14, // 47: channel.v1.ChannelService.SendMedia:output_type -> channel.v1.SendMediaResponse
+	16, // 48: channel.v1.ChannelService.GetDeliveryStatus:output_type -> channel.v1.GetDeliveryStatusResponse
+	18, // 49: channel.v1.ChannelService.EditMessage:output_type -> channel.v1.EditMessageResponse
+	20, // 50: channel.v1.ChannelService.SendPlaceholder:output_type -> channel.v1.SendPlaceholderResponse
+	22, // 51: channel.v1.ChannelService.StartTyping:output_type -> channel.v1.StartTypingResponse
+	24, // 52: channel.v1.ChannelService.StopTyping:output_type -> channel.v1.StopTypingResponse
+	26, // 53: channel.v1.ChannelService.ReactToMessage:output_type -> channel.v1.ReactToMessageResponse
+	28, // 54: channel.v1.ChannelService.CompleteReaction:output_type -> channel.v1.ReactionActionResponse
+	28, // 55: channel.v1.ChannelService.ExpireReaction:output_type -> channel.v1.ReactionActionResponse
+	30, // 56: channel.v1.ChannelService.StartStreamingMessage:output_type -> channel.v1.StartStreamingMessageResponse
+	32, // 57: channel.v1.ChannelService.UpdateStreamingMessage:output_type -> channel.v1.UpdateStreamingMessageResponse
+	34, // 58: channel.v1.ChannelService.FinishStreamingMessage:output_type -> channel.v1.FinishStreamingMessageResponse
+	44, // 59: channel.v1.ChannelService.UploadMedia:output_type -> channel.v1.UploadMediaResponse
+	46, // 60: channel.v1.ChannelService.DownloadMedia:output_type -> channel.v1.DownloadMediaResponse
+	48, // 61: channel.v1.ChannelService.ReleaseMedia:output_type -> channel.v1.ReleaseMediaResponse
+	50, // 62: channel.v1.ChannelService.RegisterCommands:output_type -> channel.v1.RegisterCommandsResponse
+	37, // 63: channel.v1.ChannelService.SubscribeInbound:output_type -> channel.v1.SubscribeInboundResponse
+	41, // [41:64] is the sub-list for method output_type
+	18, // [18:41] is the sub-list for method input_type
+	18, // [18:18] is the sub-list for extension type_name
+	18, // [18:18] is the sub-list for extension extendee
+	0,  // [0:18] is the sub-list for field type_name
 }
 
 func init() { file_channel_v1_channel_proto_init() }
@@ -2676,7 +3823,7 @@ func file_channel_v1_channel_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_channel_v1_channel_proto_rawDesc), len(file_channel_v1_channel_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   45,
+			NumMessages:   58,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

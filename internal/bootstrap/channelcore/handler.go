@@ -27,21 +27,23 @@ type ServiceHandlers struct {
 // ServiceInputs contains the stable process-scoped values shared by business
 // DI modules. It must not be used as a general-purpose service locator.
 type ServiceInputs struct {
-	Config    channelcore.Config
-	Resources *dependencies.Resources
-	Logger    *slog.Logger
-	Logging   *logging.Controller
-	Audit     *audit.Logger
-	Channels  domain.ChannelDomain
+	Config        channelcore.Config
+	Resources     *dependencies.Resources
+	Logger        *slog.Logger
+	KeelithLogger *logging.Logger
+	Logging       *logging.Controller
+	Audit         *audit.Logger
+	Channels      domain.ChannelDomain
 }
 
-func newServiceHandlers(ctx context.Context, cfg channelcore.Config, resources *dependencies.Resources, channels domain.ChannelDomain, loggingDependencies logging.Dependencies, auditLogger *audit.Logger) (*di.Graph, ServiceHandlers, error) {
+func newServiceHandlers(ctx context.Context, cfg channelcore.Config, resources *dependencies.Resources, channels domain.ChannelDomain, logDeps *logging.Dependencies, audit *audit.Logger) (*di.Graph, ServiceHandlers, error) {
 	inputs := ServiceInputs{
 		Config: cfg, Resources: resources,
-		Logger:   loggingDependencies.Logger,
-		Logging:  loggingDependencies.Controller,
-		Audit:    auditLogger,
-		Channels: channels,
+		Logger:        logDeps.Logger.Slog(),
+		KeelithLogger: logDeps.Logger,
+		Logging:       logDeps.Controller,
+		Audit:         audit,
+		Channels:      channels,
 	}
 	return di.BuildRoots[ServiceHandlers](ctx, ServiceModule(inputs))
 }
@@ -53,6 +55,7 @@ func ServiceModule(inputs ServiceInputs) di.Module {
 	return di.MustModule("demo.runtime",
 		di.Value(inputs),
 		di.Value(inputs.Logger),
+		di.Value(inputs.KeelithLogger),
 		di.Value(inputs.Logging),
 		di.Value(inputs.Audit),
 		di.IncludePlugins(plugins...),

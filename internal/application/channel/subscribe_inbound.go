@@ -9,6 +9,7 @@ import (
 func (s *Service) SubscribeInbound(request *channelv1.SubscribeInboundRequest, stream channelv1.ChannelService_SubscribeInboundKeelithServer) error {
 	queue, cancel, err := s.runtime.Subscribe(stream.Context(), request.GetChannelIds())
 	if err != nil {
+		s.logError(stream.Context(), "subscribe_inbound", err)
 		return err
 	}
 	defer cancel()
@@ -21,6 +22,7 @@ func (s *Service) SubscribeInbound(request *channelv1.SubscribeInboundRequest, s
 			if err := stream.Send(&channelv1.SubscribeInboundResponse{
 				Message: inboundMessage(message),
 			}); err != nil {
+				s.logError(stream.Context(), "subscribe_inbound.send", err)
 				return err
 			}
 		}
@@ -40,14 +42,28 @@ func inboundMessage(message domain.Inbound) *channelv1.InboundMessage {
 		})
 	}
 	return &channelv1.InboundMessage{
-		ChannelId:    message.ChannelID,
-		MessageId:    message.MessageID,
-		ChatId:       message.ChatID,
-		SenderId:     message.SenderID,
-		SenderName:   message.SenderName,
+		ChannelId:  message.ChannelID,
+		MessageId:  message.MessageID,
+		ChatId:     message.ChatID,
+		SenderId:   message.SenderID,
+		SenderName: message.SenderName,
+		Sender: &channelv1.SenderInfo{
+			Platform:    message.Sender.Platform,
+			PlatformId:  message.Sender.PlatformID,
+			CanonicalId: message.Sender.CanonicalID,
+			Username:    message.Sender.Username,
+			DisplayName: message.Sender.DisplayName,
+			AvatarUrl:   message.Sender.AvatarURL,
+		},
+		Peer: &channelv1.Peer{
+			Kind: message.Peer.Kind,
+			Id:   message.Peer.ID,
+		},
 		Content:      message.Content,
 		Metadata:     message.Metadata,
 		ReceivedAtMs: message.ReceivedAt.UnixMilli(),
 		Media:        media,
+		SessionKey:   message.SessionKey,
+		MediaScope:   message.MediaScope,
 	}
 }

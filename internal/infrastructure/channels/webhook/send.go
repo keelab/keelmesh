@@ -9,11 +9,12 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"net/http"
+	stdhttp "net/http"
 	"strings"
 	"time"
 
 	"github.com/keelab/keelmesh/internal/domain"
+	"github.com/keelab/keelmesh/internal/transport/http"
 )
 
 func (c *Channel) Send(ctx context.Context, msg domain.Outbound) (domain.ReceiptEntity, error) {
@@ -26,8 +27,9 @@ func (c *Channel) Send(ctx context.Context, msg domain.Outbound) (domain.Receipt
 	}
 	return domain.ReceiptEntity{MessageID: msg.ID, AcceptedAt: time.Now().UTC()}, nil
 }
+
 func (c *Channel) post(ctx context.Context, target string, body []byte) error {
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, target, bytes.NewReader(body))
+	req, err := stdhttp.NewRequestWithContext(ctx, stdhttp.MethodPost, target, bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
@@ -37,7 +39,7 @@ func (c *Channel) post(ctx context.Context, target string, body []byte) error {
 		_, _ = mac.Write(body)
 		req.Header.Set("X-Channel-Signature", hex.EncodeToString(mac.Sum(nil)))
 	}
-	_, err = c.client.Do(ctx, "webhook", "post", req, func(_ context.Context, resp *http.Response) (any, error) {
+	_, err = http.Do[any](ctx, c.client, "webhook", "post", req, func(_ context.Context, resp *stdhttp.Response) (any, error) {
 		_, _ = io.Copy(io.Discard, resp.Body)
 		return nil, nil
 	})

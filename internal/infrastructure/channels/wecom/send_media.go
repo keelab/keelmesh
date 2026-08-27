@@ -10,13 +10,20 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
-	"net/http"
+	stdhttp "net/http"
 	"net/url"
 	"strings"
 	"time"
 
 	"github.com/keelab/keelmesh/internal/domain"
+	"github.com/keelab/keelmesh/internal/transport/http"
 )
+
+type mediaUploadResponse struct {
+	ErrCode int    `json:"errcode"`
+	ErrMsg  string `json:"errmsg"`
+	MediaID string `json:"media_id"`
+}
 
 func (c *Channel) SendMedia(ctx context.Context, msg domain.OutboundMedia) (domain.ReceiptEntity, error) {
 	if c.config.MediaStore == nil {
@@ -105,32 +112,20 @@ func (c *Channel) uploadMedia(ctx context.Context, token string, part domain.Med
 	if err = writer.Close(); err != nil {
 		return "", err
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, &body)
+	req, err := stdhttp.NewRequestWithContext(ctx, stdhttp.MethodPost, endpoint, &body)
 	if err != nil {
 		return "", err
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	var result struct {
-		ErrCode int    `json:"errcode"`
-		ErrMsg  string `json:"errmsg"`
-		MediaID string `json:"media_id"`
-	}
-	value, err := c.client.Do(ctx, "wecom", "uploadMedia", req, func(_ context.Context, response *http.Response) (any, error) {
+	result, err := http.Do[mediaUploadResponse](ctx, c.client, "wecom", "uploadMedia", req, func(_ context.Context, response *stdhttp.Response) (mediaUploadResponse, error) {
+		var result mediaUploadResponse
 		if err := json.NewDecoder(response.Body).Decode(&result); err != nil {
-			return nil, err
+			return mediaUploadResponse{}, err
 		}
 		return result, nil
 	})
 	if err != nil {
 		return "", err
-	}
-	result, ok := value.(struct {
-		ErrCode int    `json:"errcode"`
-		ErrMsg  string `json:"errmsg"`
-		MediaID string `json:"media_id"`
-	})
-	if !ok {
-		return "", fmt.Errorf("wecom: media upload unexpected response type %T", value)
 	}
 	if result.ErrCode != 0 || result.MediaID == "" {
 		return "", fmt.Errorf("wecom: media upload failed: %s", result.ErrMsg)

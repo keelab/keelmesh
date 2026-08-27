@@ -25,6 +25,8 @@ type ChannelDomain interface {
 	Publish(message Inbound)
 	ReleaseMedia(ctx context.Context, ref string) error
 	Send(ctx context.Context, message Outbound) (ReceiptEntity, error)
+	SendNotification(ctx context.Context, message Notification) (NotificationReceipt, error)
+	PrepareInbound(ctx context.Context, message InboundPreparation) (InboundPreparationReceipt, error)
 	SendMedia(ctx context.Context, message OutboundMedia) (ReceiptEntity, error)
 	SetMediaStore(store MediaDomain)
 	Start(ctx context.Context) error
@@ -67,6 +69,32 @@ type MediaChannel interface {
 	SendMedia(context.Context, OutboundMedia) (ReceiptEntity, error)
 }
 
+// NotificationController lets a platform preserve its native notification
+// semantics (mentions and urgency) while keeping the common receipt contract.
+type NotificationController interface {
+	SendNotification(context.Context, Notification) (NotificationReceipt, error)
+}
+
+// CommandRegistrar registers transport-neutral slash command definitions with
+// a platform when the adapter supports native command registration.
+type CommandRegistrar interface {
+	RegisterCommands(context.Context, []CommandDefinition) error
+}
+
+type CommandDefinition struct {
+	Name        string
+	Description string
+	Usage       string
+	Aliases     []string
+	SubCommands []CommandSubcommand
+}
+
+type CommandSubcommand struct {
+	Name        string
+	Description string
+	ArgsUsage   string
+}
+
 type MessageEditor interface {
 	EditMessage(context.Context, string, string, string) error
 }
@@ -74,6 +102,12 @@ type MessageEditor interface {
 type LifecycleEditor interface {
 	EditMessageWithState(context.Context, string, string, string, string, map[string]string) error
 }
+
+const (
+	MessageLifecycleProgress = "progress"
+	MessageLifecycleFinal    = "final"
+	MessageLifecycleFailed   = "failed"
+)
 
 type TypingController interface {
 	StartTyping(context.Context, string) (func(), error)
@@ -98,10 +132,16 @@ type DefinitionEntity struct {
 	Kind          string
 	Enabled       bool
 	Capabilities  []string
+	GroupTrigger  GroupTriggerPolicy
 	RatePerSecond float64
 	Burst         int
 	QueueSize     int
 	MaxRetries    int
+}
+
+type GroupTriggerPolicy struct {
+	MentionOnly bool
+	Prefixes    []string
 }
 type Sink func(Inbound)
 
@@ -111,10 +151,28 @@ type Inbound struct {
 	ChatID     string
 	SenderID   string
 	SenderName string
+	Sender     SenderInfo
+	Peer       Peer
 	Content    string
 	Metadata   map[string]string
 	Media      []MediaPartEntity
+	SessionKey string
+	MediaScope string
 	ReceivedAt time.Time
+}
+
+type SenderInfo struct {
+	Platform    string
+	PlatformID  string
+	CanonicalID string
+	Username    string
+	DisplayName string
+	AvatarURL   string
+}
+
+type Peer struct {
+	Kind string
+	ID   string
 }
 type MediaPartEntity struct {
 	Type        string
@@ -145,4 +203,35 @@ type ReceiptEntity struct {
 	MessageID  string
 	AcceptedAt time.Time
 	State      DeliveryState
+}
+
+type Notification struct {
+	ChannelID      string
+	TargetID       string
+	Content        string
+	Metadata       map[string]string
+	MentionIDs     []string
+	MentionAll     bool
+	Urgency        string
+	IdempotencyKey string
+}
+
+type NotificationReceipt struct {
+	ReceiptEntity
+	InvalidMentionIDs []string
+}
+
+type InboundPreparation struct {
+	ChannelID          string
+	TargetID           string
+	MessageID          string
+	ReplyToMessageID   string
+	PlaceholderContent string
+	Reaction           string
+}
+
+type InboundPreparationReceipt struct {
+	TypingActionID       string
+	ReactionActionID     string
+	PlaceholderMessageID string
 }

@@ -2,7 +2,6 @@ package feishu
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -19,13 +18,13 @@ func (c *Channel) Send(ctx context.Context, message domain.Outbound) (domain.Rec
 	if strings.TrimSpace(message.TargetID) == "" {
 		return domain.ReceiptEntity{}, errors.New("feishu: target id is required")
 	}
-	payload, err := json.Marshal(map[string]string{"text": message.Content})
+	payload, err := buildMarkdownCard(message.Content)
 	if err != nil {
 		return domain.ReceiptEntity{}, err
 	}
 	var resp *larkim.CreateMessageResp
 	if message.ReplyToMessageID != "" {
-		replyReq := larkim.NewReplyMessageReqBuilder().MessageId(message.ReplyToMessageID).Body(larkim.NewReplyMessageReqBodyBuilder().MsgType(larkim.MsgTypeText).Content(string(payload)).ReplyInThread(true).Build()).Build()
+		replyReq := larkim.NewReplyMessageReqBuilder().MessageId(message.ReplyToMessageID).Body(larkim.NewReplyMessageReqBodyBuilder().MsgType(larkim.MsgTypeInteractive).Content(payload).ReplyInThread(true).Build()).Build()
 		replyResp, replyErr := c.client.Im.V1.Message.Reply(ctx, replyReq)
 		if replyErr != nil {
 			return domain.ReceiptEntity{}, fmt.Errorf("feishu: reply message: %w", replyErr)
@@ -39,7 +38,7 @@ func (c *Channel) Send(ctx context.Context, message domain.Outbound) (domain.Rec
 		}
 		return domain.ReceiptEntity{MessageID: id, AcceptedAt: time.Now().UTC()}, nil
 	}
-	req := larkim.NewCreateMessageReqBuilder().ReceiveIdType(larkim.ReceiveIdTypeChatId).Body(larkim.NewCreateMessageReqBodyBuilder().ReceiveId(message.TargetID).MsgType(larkim.MsgTypeText).Content(string(payload)).Build()).Build()
+	req := larkim.NewCreateMessageReqBuilder().ReceiveIdType(larkim.ReceiveIdTypeChatId).Body(larkim.NewCreateMessageReqBodyBuilder().ReceiveId(message.TargetID).MsgType(larkim.MsgTypeInteractive).Content(payload).Build()).Build()
 	resp, err = c.client.Im.V1.Message.Create(ctx, req)
 	if err != nil {
 		return domain.ReceiptEntity{}, fmt.Errorf("feishu: create message: %w", err)

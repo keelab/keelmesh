@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package agent.v1;
+
+option go_package = "github.com/keelab/keelmesh/gen/agent/v1;agentv1";
+
+service AgentRuntimeService {
+  rpc ExecuteTask(ExecuteTaskRequest) returns (ExecuteTaskResponse);
+  rpc SubscribeTaskEvents(SubscribeTaskEventsRequest) returns (stream TaskEvent);
+}
+
+message ExecuteTaskRequest {
+  string task_id = 1;
+  string channel_id = 2;
+  string target_id = 3;
+  string content = 4;
+  map<string, string> metadata = 5;
+}
+
+message ExecuteTaskResponse {
+  string task_id = 1;
+  string state = 2;
+  string content = 3;
+  string error = 4;
+}
+
+message SubscribeTaskEventsRequest {
+  string task_id = 1;
+  int64 after_sequence = 2;
+}
+
+message TaskEvent {
+  string task_id = 1;
+  string state = 2;
+  string content = 3;
+  string error = 4;
+  ProgressSnapshot progress = 5;
+  string event_id = 6;
+  int64 sequence = 7;
+  int64 occurred_at_ms = 8;
+}
+
+message ProgressSnapshot {
+  string status = 1;
+  string phase = 2;
+  string preview = 3;
+  int32 iteration = 4;
+  int64 elapsed_ms = 5;
+  repeated ProgressStep steps = 6;
+}
+
+message ProgressStep {
+  string id = 1;
+  string kind = 2;
+  string status = 3;
+  string title = 4;
+  string summary = 5;
+  string tool = 6;
+  int32 iteration = 7;
+  int64 duration_ms = 8;
+}

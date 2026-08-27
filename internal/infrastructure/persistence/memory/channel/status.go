@@ -15,13 +15,20 @@ func (r *Repository) RuntimeStatus(context.Context) (ops.RuntimeStatus, error) {
 	enabled := 0
 	running := 0
 	capabilitySet := make(map[string]struct{})
+	inboundDropped := r.inboundDropped.Load()
+	forwardDropped := r.forwardDropped.Load()
+	forwardFailures := r.forwardFailures.Load()
 	for _, item := range r.registry.All() {
 		definition := item.Definition()
 		if !definition.Enabled {
 			continue
 		}
 		enabled++
-		capabilitySet[definition.Kind] = struct{}{}
+		for _, capability := range definition.Capabilities {
+			if capability != "" {
+				capabilitySet[capability] = struct{}{}
+			}
+		}
 		if item.Running() {
 			running++
 		}
@@ -56,6 +63,9 @@ func (r *Repository) RuntimeStatus(context.Context) (ops.RuntimeStatus, error) {
 			{Name: "enabled", Value: uint64(enabled)},
 			{Name: "running", Value: uint64(running)},
 			{Name: "not_running", Value: uint64(enabled - running)},
+			{Name: "inbound_dropped", Value: inboundDropped},
+			{Name: "gate_forward_dropped", Value: forwardDropped},
+			{Name: "gate_forward_failures", Value: forwardFailures},
 		},
 		Capabilities: capabilities,
 	}, nil

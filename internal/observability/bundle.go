@@ -67,7 +67,7 @@ func New(config Config) (*Bundle, error) {
 	}}
 	if config.RequestLogsEnabled {
 		requestLogger, err := logging.NewRequestLogger(
-			telemetry.Logger(),
+			telemetry.Logger().Slog(),
 			config.RequestLogs,
 		)
 		if err != nil {
@@ -85,12 +85,7 @@ func New(config Config) (*Bundle, error) {
 	server, err := middleware.NewServerBundle(middleware.ServerBundleConfig{
 		Observability: serverObservability,
 		RecoveryReporter: func(ctx context.Context, report middleware.PanicReport) {
-			telemetry.Logger().ErrorContext(
-				ctx,
-				"recovered request panic",
-				"panic_type", report.Type,
-				"stack", string(report.Stack),
-			)
+			telemetry.Logger().ErrorContext(ctx, "recovered request panic", "panic_type", report.Type, "stack", string(report.Stack))
 		},
 	})
 	if err != nil {
@@ -102,7 +97,11 @@ func New(config Config) (*Bundle, error) {
 		_ = telemetry.Shutdown(context.Background())
 		return nil, fmt.Errorf("observability: build stream middleware: %w", err)
 	}
-	return &Bundle{telemetry: telemetry, server: server, stream: stream}, nil
+	return &Bundle{
+		telemetry: telemetry,
+		server:    server,
+		stream:    stream,
+	}, nil
 }
 
 // LoggerDependencies returns the explicit wiring inputs owned by this policy.

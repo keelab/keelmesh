@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/keelab/keelith/app/termination"
 	"github.com/keelab/keelmesh/internal/bootstrap/loopcore"
-	"github.com/keelab/keelmesh/internal/platform/processlog"
 )
 
 func main() {
@@ -22,7 +22,7 @@ func main() {
 	})
 	signal.Stop(signals)
 	if errors.Is(err, termination.ErrForcedShutdown) {
-		processlog.Logger().Error("forced shutdown after second signal")
+		slog.Error("forced shutdown after second signal")
 		os.Exit(2)
 	}
 	if err != nil && !errors.Is(err, context.Canceled) {

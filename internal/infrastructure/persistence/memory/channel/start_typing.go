@@ -16,7 +16,7 @@ func (r *Repository) StartTyping(ctx context.Context, channelID, targetID string
 	}
 	controller, ok := channel.(domain.TypingController)
 	if !ok {
-		return "", fmt.Errorf("channelcore: channel %q does not support typing", channelID)
+		return "", fmt.Errorf("%w: channel %q does not support typing", ErrUnsupported, channelID)
 	}
 	stop, err := controller.StartTyping(ctx, targetID)
 	if err != nil {

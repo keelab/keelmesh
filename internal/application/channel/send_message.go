@@ -17,6 +17,7 @@ func (s *Service) SendMessage(ctx context.Context, request *channelv1.SendMessag
 		IdempotencyKey: request.GetIdempotencyKey(),
 	})
 	if err != nil {
+		s.logError(ctx, "send_message", err, "channel_id", request.GetChannelId(), "target_id", request.GetTargetId())
 		return nil, err
 	}
 

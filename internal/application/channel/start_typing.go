@@ -10,6 +10,7 @@ import (
 func (s *Service) StartTyping(ctx context.Context, request *channelv1.StartTypingRequest) (*channelv1.StartTypingResponse, error) {
 	id, err := s.runtime.StartTyping(ctx, request.GetChannelId(), request.GetTargetId())
 	if err != nil {
+		s.logError(ctx, "start_typing", err, "channel_id", request.GetChannelId(), "target_id", request.GetTargetId())
 		return nil, err
 	}
 

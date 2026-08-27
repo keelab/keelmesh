@@ -5,10 +5,19 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
+	stdhttp "net/http"
 	"net/url"
 	"time"
+
+	"github.com/keelab/keelmesh/internal/transport/http"
 )
+
+type tokenResponse struct {
+	ErrCode     int    `json:"errcode"`
+	ErrMsg      string `json:"errmsg"`
+	AccessToken string `json:"access_token"`
+	ExpiresIn   int    `json:"expires_in"`
+}
 
 func (c *Channel) Probe(ctx context.Context) error {
 	if !c.config.Enabled {
@@ -33,33 +42,19 @@ func (c *Channel) getToken(ctx context.Context) (string, error) {
 	}
 	c.mu.Unlock()
 	endpoint := "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=" + url.QueryEscape(c.config.CorpID) + "&corpsecret=" + url.QueryEscape(c.config.CorpSecret)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+	req, err := stdhttp.NewRequestWithContext(ctx, stdhttp.MethodGet, endpoint, nil)
 	if err != nil {
 		return "", err
 	}
-	var result struct {
-		ErrCode     int    `json:"errcode"`
-		ErrMsg      string `json:"errmsg"`
-		AccessToken string `json:"access_token"`
-		ExpiresIn   int    `json:"expires_in"`
-	}
-	value, err := c.client.Do(ctx, "wecom", "getToken", req, func(_ context.Context, response *http.Response) (any, error) {
-		if err := json.NewDecoder(response.Body).Decode(&result); err != nil {
-			return nil, err
+	result, err := http.Do[tokenResponse](ctx, c.client, "wecom", "getToken", req, func(_ context.Context, response *stdhttp.Response) (tokenResponse, error) {
+		var result tokenResponse
+		if err = json.NewDecoder(response.Body).Decode(&result); err != nil {
+			return tokenResponse{}, err
 		}
 		return result, nil
 	})
 	if err != nil {
 		return "", err
-	}
-	result, ok := value.(struct {
-		ErrCode     int    `json:"errcode"`
-		ErrMsg      string `json:"errmsg"`
-		AccessToken string `json:"access_token"`
-		ExpiresIn   int    `json:"expires_in"`
-	})
-	if !ok {
-		return "", fmt.Errorf("wecom: gettoken unexpected response type %T", value)
 	}
 	if result.ErrCode != 0 || result.AccessToken == "" {
 		return "", fmt.Errorf("wecom: gettoken failed: %s", result.ErrMsg)

@@ -31,6 +31,7 @@ func (r *Repository) Stop(ctx context.Context) error {
 	if janitorDone != nil {
 		<-janitorDone
 	}
+	r.forwardWG.Wait()
 	for _, worker := range workers {
 		done := make(chan struct{})
 		go func(w *channelWorker) { w.wg.Wait(); close(done) }(worker)

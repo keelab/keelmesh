@@ -110,7 +110,19 @@ func (c *Channel) receive(ctx context.Context, event *larkim.P2MessageReceiveV1)
 	sink := c.sink
 	c.mu.Unlock()
 	if sink != nil {
-		sink(domain.Inbound{ChannelID: c.config.ID, MessageID: messageID, ChatID: chatID, SenderID: senderID, Content: content, Media: media, Metadata: map[string]string{"message_type": value(message.MessageType)}, ReceivedAt: time.Now().UTC()})
+		chatType := value(message.ChatType)
+		metadata := map[string]string{
+			"message_type": value(message.MessageType),
+			"scope":        "direct",
+			"mentioned":    "false",
+		}
+		if chatType != "p2p" {
+			metadata["scope"] = "group"
+			if len(message.Mentions) > 0 {
+				metadata["mentioned"] = "true"
+			}
+		}
+		sink(domain.Inbound{ChannelID: c.config.ID, MessageID: messageID, ChatID: chatID, SenderID: senderID, Content: content, Media: media, Metadata: metadata, ReceivedAt: time.Now().UTC()})
 	}
 	return nil
 }

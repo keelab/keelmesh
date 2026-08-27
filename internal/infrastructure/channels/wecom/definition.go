@@ -10,6 +10,7 @@ func (c *Channel) Definition() domain.DefinitionEntity {
 		Kind:          c.config.Kind,
 		Enabled:       c.config.Enabled,
 		Capabilities:  []string{"messages", "inbound_stream", "webhook"},
+		GroupTrigger:  c.config.GroupTrigger,
 		RatePerSecond: c.config.RatePerSecond,
 		Burst:         c.config.Burst,
 		QueueSize:     c.config.QueueSize,

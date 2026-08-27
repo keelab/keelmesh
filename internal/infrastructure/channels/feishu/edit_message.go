@@ -2,7 +2,6 @@ package feishu
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -17,11 +16,11 @@ func (c *Channel) EditMessage(ctx context.Context, targetID, messageID, content 
 	if strings.TrimSpace(messageID) == "" {
 		return errors.New("feishu: message id is required")
 	}
-	encoded, err := json.Marshal(map[string]string{"text": content})
+	encoded, err := buildMarkdownCard(content)
 	if err != nil {
 		return err
 	}
-	response, err := c.client.Im.V1.Message.Patch(ctx, larkim.NewPatchMessageReqBuilder().MessageId(messageID).Body(larkim.NewPatchMessageReqBodyBuilder().Content(string(encoded)).Build()).Build())
+	response, err := c.client.Im.V1.Message.Patch(ctx, larkim.NewPatchMessageReqBuilder().MessageId(messageID).Body(larkim.NewPatchMessageReqBodyBuilder().Content(encoded).Build()).Build())
 	if err != nil {
 		return fmt.Errorf("feishu: patch message: %w", err)
 	}

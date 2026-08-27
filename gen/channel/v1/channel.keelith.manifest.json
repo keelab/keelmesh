@@ -39,6 +39,20 @@
           "output": "channel.v1.SendMessageResponse"
         },
         {
+          "name": "SendNotification",
+          "operation": "/channel.v1.ChannelService/SendNotification",
+          "kind": "unary",
+          "input": "channel.v1.SendNotificationRequest",
+          "output": "channel.v1.SendNotificationResponse"
+        },
+        {
+          "name": "PrepareInbound",
+          "operation": "/channel.v1.ChannelService/PrepareInbound",
+          "kind": "unary",
+          "input": "channel.v1.PrepareInboundRequest",
+          "output": "channel.v1.PrepareInboundResponse"
+        },
+        {
           "name": "SendMedia",
           "operation": "/channel.v1.ChannelService/SendMedia",
           "kind": "unary",
@@ -142,6 +156,13 @@
           "kind": "unary",
           "input": "channel.v1.ReleaseMediaRequest",
           "output": "channel.v1.ReleaseMediaResponse"
+        },
+        {
+          "name": "RegisterCommands",
+          "operation": "/channel.v1.ChannelService/RegisterCommands",
+          "kind": "unary",
+          "input": "channel.v1.RegisterCommandsRequest",
+          "output": "channel.v1.RegisterCommandsResponse"
         },
         {
           "name": "SubscribeInbound",

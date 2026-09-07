@@ -6,7 +6,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/keelab/contrib v0.0.1
-	github.com/keelab/keelith v0.0.3
+	github.com/keelab/keelith v0.0.4
 	github.com/larksuite/oapi-sdk-go/v3 v3.5.3
 	github.com/open-dingtalk/dingtalk-stream-sdk-go v0.9.1
 	github.com/tencent-connect/botgo v0.2.1
@@ -19,7 +19,7 @@ require (
 )
 
 require (
-	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.12-20260709200747-435963d16310.1 // indirect
+	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.12-20260825204119-511051f7f437.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/coder/websocket v1.8.15 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect

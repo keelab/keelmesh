@@ -4,7 +4,7 @@ go 1.26.7
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/jackc/pgx/v5 v5.10.0
+	github.com/jackc/pgx/v5 v5.11.0
 	github.com/keelab/contrib v0.0.1
 	github.com/keelab/keelith v0.0.3
 	github.com/larksuite/oapi-sdk-go/v3 v3.5.3
